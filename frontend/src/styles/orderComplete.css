@@ -1,0 +1,47 @@
+.order-complete-page {
+  padding: 48px;
+  display: flex;
+  justify-content: center;
+}
+
+.complete-card {
+  max-width: 480px;
+  width: 100%;
+  padding: 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.check-icon {
+  font-size: 48px;
+  color: #2563eb;
+  margin-bottom: 16px;
+}
+
+.desc {
+  margin: 16px 0 32px;
+  color: #444;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.actions button {
+  padding: 12px 20px;
+  font-size: 14px;
+}
+
+.primary {
+  background: #2563eb;
+  color: white;
+  border: none;
+}
+
+.secondary {
+  background: white;
+  border: 1px solid #ccc;
+}
