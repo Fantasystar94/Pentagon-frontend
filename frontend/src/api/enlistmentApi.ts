@@ -4,13 +4,20 @@ import { api } from "./client";
 /* =====================
    Types
 ===================== */
-export interface EnlistmentCreateRequest {
+export interface EnlistmentScheduleCreateRequest {
   scheduleId: number;
 }
 
-export interface DefermentPostRequest {
-  applicationId: number;
-  defermentStatus:
+export interface EnlistmentQuery {
+  page?: number;
+  size?: number;
+  sort?: string;
+  pageable?: any;
+}
+
+export interface DefermentsPostRequest {
+  applicationId?: number;
+  defermentStatus?:
     | "ILLNESS"
     | "STUDY"
     | "FAMILY"
@@ -19,7 +26,7 @@ export interface DefermentPostRequest {
     | "APPROVED"
     | "REJECTED";
   reasonDetail?: string;
-  requestedUntil?: string;
+  scheduleId?: number;
 }
 
 export interface DefermentPatchRequest {
@@ -34,57 +41,91 @@ export interface DefermentPatchRequest {
 }
 
 /* =====================
-   User API
+   Enlistment Schedule API
 ===================== */
 export const enlistmentApi = {
-  getEnlistmentList: () =>
-    api.get("/api/enlistment"),
+  // 입영 일정 목록 조회
+  getEnlistmentList: (page: number = 0, size: number = 100) =>
+    api.get("/api/enlistment", {
+      params: { 
+        page, 
+        size,
+      },
+    }),
 
+  // 입영 일정 상세 조회
   getEnlistment: (scheduleId: number) =>
     api.get(`/api/enlistment/${scheduleId}`),
 
-  applyEnlistment: (data: EnlistmentCreateRequest) =>
-    api.post("/api/enlistment", data),
+  // 이번주 입영 일정 요약
+  getThisWeekSummary: (nx?: number, ny?: number) =>
+    api.get("/api/enlistment/thisWeek", { params: { nx, ny } }),
 
-  cancelApplication: (applicationId: number) =>
-    api.patch(`/api/enlistment/${applicationId}/cancel`),
-
-  /* =====================
-     Deferment
-  ===================== */
-  getDeferments: (params?: any) =>
-    api.get("/api/enlistment/deferments", { params }),
-
-  getDeferment: (defermentsId: number) =>
-    api.get(`/api/enlistment/deferments/${defermentsId}`),
-
-  applyDeferment: (data: DefermentPostRequest) =>
-    api.post("/api/enlistment/deferments", data),
-
-  /* =====================
-     Admin
-  ===================== */
-  approveApplication: (applicationId: number) =>
-    api.patch(`/api/enlistment/admin/${applicationId}/approve`),
-
-  processDeferment: (
-    applicationId: number,
-    data: DefermentPatchRequest
+  // 입영 일정 검색
+  searchEnlistment: (
+    startDate: string,
+    endDate: string,
+    params?: EnlistmentQuery
   ) =>
-    api.patch(
-      `/api/enlistment/admin/deferments/${applicationId}`,
-      data
-    ),
+    api.get("/api/enlistment/search", {
+      params: { startDate, endDate, ...params },
+    }),
 
+  /* =====================
+     Enlistment Application
+  ===================== */
+  // 입영 신청 목록 조회
+  getApplicationList: () =>
+    api.get("/api/enlistment-applications"),
+
+  // 입영 신청 상세 조회
+  getApplication: (applicationId: number) =>
+    api.get(`/api/enlistment-applications/${applicationId}`),
+
+  // 입영 신청
+  applyEnlistment: (data: EnlistmentScheduleCreateRequest) =>
+    api.post("/api/enlistment-applications", data),
+
+  // 입영 신청 취소
+  cancelApplication: (applicationId: number) =>
+    api.patch(`/api/enlistment-applications/${applicationId}/cancel`),
+
+  /* =====================
+     Deferment (연기)
+  ===================== */
+  // 연기 신청
+  applyDeferment: (data: DefermentsPostRequest) =>
+    api.post("/api/deferments", data),
+
+  // 연기 신청 상세 조회
+  getDeferment: (defermentsId: number) =>
+    api.get(`/api/deferments/${defermentsId}`),
+
+  /* =====================
+     Admin API
+  ===================== */
+  // 관리자: 입영 일정 생성
+  createEnlistmentSchedule: () =>
+    api.post("/api/admin/enlistment-schedule"),
+
+  // 관리자: 입영 신청 승인
+  approveApplication: (applicationId: number) =>
+    api.patch(`/api/admin/enlistment-applications/${applicationId}/approve`),
+
+  // 관리자: 일괄 승인
+  approveApplicationBulk: () =>
+    api.patch("/api/admin/enlistment-applications/approve/bulk"),
+
+  // 관리자: 연기 처리
+  processDeferment: (defermentsId: number, data: DefermentPatchRequest) =>
+    api.patch(`/api/admin/deferments/${defermentsId}`, data),
+
+  // 관리자: 연기 일괄 처리
   processDefermentBulk: (data: DefermentPatchRequest) =>
-    api.patch(
-      "/api/enlistment/admin/deferments/bulk",
-      data
-    ),
+    api.patch("/api/admin/deferments/bulk", data),
 
-  getPendingApplications: () =>
-    api.get("/api/enlistment/pending"),
-
-  getPendingApplication: (scheduleId: number) =>
-    api.get(`/api/enlistment/pending/${scheduleId}`),
+  // 관리자: 연기 목록 조회
+  getDefermentList: (params?: EnlistmentQuery) =>
+    api.get("/api/admin/deferments", { params }),
 };
+

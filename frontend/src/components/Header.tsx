@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/userAuth";
 
 export default function Header() {
-  const { isLoggedIn, logout } = useAuth();
+  const { isLoggedIn, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -21,6 +21,7 @@ export default function Header() {
         <Link to="/deferments">연기 신청</Link>
         <Link to="/notices">공지사항</Link>
         <Link to="/qna">QnA</Link>
+        {isLoggedIn && isAdmin && <Link to="/admin">어드민</Link>}
       </nav>
 
       <div>
@@ -61,6 +62,8 @@ const styles = {
     alignItems: "center",
   },
   logoutBtn: {
+    padding:0,
+    margin:0,
     border: "none",
     background: "transparent",
     cursor: "pointer",

@@ -8,7 +8,7 @@ import { enlistmentApi } from "../api/enlistmentApi";
 ===================== */
 type Schedule = {
   scheduleId: number;
-  enlistmentDate: string; // YYYY-MM-DD
+  enlistmentDate: string | Date; // YYYY-MM-DD 또는 Date 객체
   remainingSlots: number;
 };
 
@@ -53,13 +53,52 @@ export default function Enlistment() {
   const fetchSchedules = async () => {
     try {
       setLoading(true);
-      const res = await enlistmentApi.getEnlistmentList();
+      const res = await enlistmentApi.getEnlistmentList(0, 100);
 
-      // 🔥 Swagger 기준 필드명 매핑
-      setSchedules(res.data.data);
-    } catch (e) {
-      console.error("입영 일정 조회 실패", e);
-      alert("입영 일정을 불러오지 못했습니다.");
+      console.log("=== 입영 일정 조회 ===");
+      console.log("전체 응답:", res);
+      console.log("res.data:", res.data);
+      console.log("res.data.data:", res.data?.data);
+      console.log("res.data.content:", res.data?.content);
+      
+      // 응답 데이터 구조 확인 후 처리
+      let data = res.data?.data || res.data?.content || res.data || [];
+      
+      // 만약 data가 객체라면 그 안의 배열을 찾아보기
+      if (!Array.isArray(data) && typeof data === "object") {
+        console.log("data는 객체입니다. 내용:", data);
+        console.log("객체의 키:", Object.keys(data));
+        // content 필드 확인
+        if (data.content && Array.isArray(data.content)) {
+          data = data.content;
+        }
+      }
+      
+      console.log("최종 처리할 데이터:", data);
+      console.log("배열 여부:", Array.isArray(data));
+      
+      if (Array.isArray(data)) {
+        console.log("데이터 개수:", data.length);
+        if (data.length > 0) {
+          console.log("첫 번째 데이터:", data[0]);
+        }
+        setSchedules(data);
+      } else {
+        console.warn("데이터가 배열이 아닙니다:", data);
+        setSchedules([]);
+      }
+    } catch (e: any) {
+      console.error("입영 일정 조회 실패:", {
+        message: e?.message,
+        response: e?.response?.data,
+        status: e?.response?.status,
+      });
+      
+      if (e?.response?.data?.message) {
+        alert(`오류: ${e.response.data.message}`);
+      } else {
+        alert("입영 일정을 불러오지 못했습니다. 백엔드를 확인하세요.");
+      }
     } finally {
       setLoading(false);
     }
@@ -74,7 +113,28 @@ export default function Enlistment() {
   ===================== */
   const scheduleMap = useMemo(() => {
     const m = new Map<string, Schedule>();
-    schedules.forEach((s) => m.set(s.enlistmentDate, s));
+    schedules.forEach((s) => {
+      // enlistmentDate를 문자열로 정규화
+      let dateStr: string;
+      if (typeof s.enlistmentDate === "string") {
+        dateStr = s.enlistmentDate;
+      } else if (s.enlistmentDate instanceof Date) {
+        dateStr = toYMD(s.enlistmentDate);
+      } else if (Array.isArray(s.enlistmentDate)) {
+        // [year, month, day] 형식 대응 (혹시모르니)
+        const arr = s.enlistmentDate as any[];
+        const [y, m, d] = arr;
+        dateStr = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      } else {
+        dateStr = "";
+      }
+      if (dateStr) {
+        m.set(dateStr, { ...s, enlistmentDate: dateStr } as Schedule);
+      }
+    });
+    console.log("scheduleMap 생성됨:", m);
+    console.log("scheduleMap 크기:", m.size);
+    console.log("scheduleMap 키:", Array.from(m.keys()));
     return m;
   }, [schedules]);
 
@@ -227,7 +287,6 @@ export default function Enlistment() {
 
               {selectedSchedule ? (
                 <div className="selected-info">
-                  <div>scheduleId: {selectedSchedule.scheduleId}</div>
                   <div>잔여 인원: {selectedSchedule.remainingSlots}</div>
                 </div>
               ) : (
@@ -239,41 +298,6 @@ export default function Enlistment() {
               <button className="primary-btn" onClick={handleApply}>
                 이 날짜로 입영 신청
               </button>
-            </div>
-
-            <h3 className="section-title">전체 일정</h3>
-            <div className="list">
-              {schedules.map((s) => (
-                <button
-                  key={s.scheduleId}
-                  className={[
-                    "list-item",
-                    s.enlistmentDate === selectedDate && "active",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  onClick={() => setSelectedDate(s.enlistmentDate)}
-                >
-                  <div>
-                    <div className="li-date">{s.enlistmentDate}</div>
-                    <div className="li-sub">
-                      scheduleId: {s.scheduleId}
-                    </div>
-                  </div>
-                  <div
-                    className={[
-                      "li-right",
-                      s.remainingSlots <= 0 && "bad",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                  >
-                    {s.remainingSlots > 0
-                      ? `잔여 ${s.remainingSlots}`
-                      : "마감"}
-                  </div>
-                </button>
-              ))}
             </div>
           </section>
         </div>

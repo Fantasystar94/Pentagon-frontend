@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { authApi } from "../api/authApi";
 import "../styles/login.css";
 
 export default function Login() {
-  const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +18,8 @@ const handleLogin = async () => {
     console.log("login response:", res);
 
     const accessToken = res.data?.data?.accessToken;
+    const username = res.data?.data?.username;
+    const userId = res.data?.data?.userId;
     console.log("accessToken:", accessToken);
 
     if (!accessToken) {
@@ -27,6 +28,13 @@ const handleLogin = async () => {
     }
 
     localStorage.setItem("accessToken", accessToken);
+    if (username) {
+      localStorage.setItem("username", username);
+    }
+    if (userId) {
+      localStorage.setItem("userId", userId.toString());
+    }
+    localStorage.setItem("email", email);
     window.location.href = "/"; // 이 줄 하나만 남긴다
   } catch (e) {
     console.error("login error:", e);

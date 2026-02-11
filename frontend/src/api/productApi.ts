@@ -16,6 +16,7 @@ export interface ProductQuery {
   size?: number;
   sort?: string;
   direction?: "asc" | "desc";
+  keyword?: string;
 }
 
 /* =====================
@@ -39,5 +40,16 @@ export const productApi = {
 
   deleteProduct: (productId: number) =>
     api.delete(`/api/admin/products/${productId}`),
+
+  // 상품 이미지 업로드
+  uploadProductImage: (productId: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post(`/api/admin/products/${productId}/image`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 };
 

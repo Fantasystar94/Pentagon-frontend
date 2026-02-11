@@ -10,6 +10,7 @@ type Product = {
   description: string;
   price: number;
   stock: number;
+  productImageUrl: string;
 };
 
 export default function Products() {
@@ -22,6 +23,7 @@ export default function Products() {
       try {
         const res = await productApi.getProducts();
         setProducts(res.data.data.content ?? res.data.data);
+        console.log("상품 조회 성공:", res);
       } catch (e) {
         console.error("상품 조회 실패", e);
       } finally {
@@ -52,7 +54,11 @@ export default function Products() {
                 className="product-card"
                 onClick={() => navigate(`/products/${p.productId}`)}
               >
-                <div className="thumb" />
+                <div className="thumb">
+                  {p.productImageUrl && (
+                    <img src={p.productImageUrl} alt={p.name} loading="lazy" />
+                  )}
+                </div>
 
                 <h4 className="product-name">{p.name}</h4>
                 <p className="product-desc">{p.description}</p>

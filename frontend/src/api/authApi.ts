@@ -14,6 +14,7 @@ export interface SignupRequest {
   password: string;
   username: string;
   admin?: boolean;
+  adminToken?: string;
 }
 
 export interface TokenRequest {
@@ -35,4 +36,8 @@ export const authApi = {
 
   logout: () =>
     api.post("/api/auth/logout"),
+
+  // 카카오 로그인
+  kakaoLogin: (code: string) =>
+    api.get("/api/auth/kakao/callback", { params: { code } }),
 };

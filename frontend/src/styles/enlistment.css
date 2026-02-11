@@ -27,7 +27,9 @@
 
 .month-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
 }
 
 .icon-btn {
@@ -36,6 +38,9 @@
   border-radius: 8px;
   padding: 6px 10px;
   cursor: pointer;
+  color: #4a6cf7;
+  font-weight: bold;
+  font-size: 16px;
 }
 
 .weekdays {
@@ -151,6 +156,7 @@
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 8px;
+  color: #222;
 }
 
 .selected-info {

@@ -36,6 +36,13 @@ export default function ProductDetail() {
     <>
       <Header />
       <main className="product-detail">
+        {product.productImageUrl && (
+          <img
+            src={product.productImageUrl}
+            alt={product.name}
+            style={{ width: "100%", maxWidth: 480, borderRadius: 8, marginBottom: 16 }}
+          />
+        )}
         <h3>{product.name}</h3>
         <p>{product.description}</p>
         <p>가격: {product.price.toLocaleString()}원</p>

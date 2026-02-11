@@ -1,0 +1,66 @@
+body, .qna-page {
+  background: #f5f6fa;
+}
+.qna-wrapper {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #fff;
+  color: #222;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.qna-list {
+  margin-top: 24px;
+}
+.qna-item {
+  border-bottom: 1px solid #eee;
+  padding: 16px 0;
+  color: #222;
+}
+.qna-item:last-child {
+  border-bottom: none;
+}
+.qna-answer {
+  margin-top: 8px;
+  color: #2a7b2a;
+  font-weight: 500;
+}
+button {
+  margin:0;
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #1976d2;
+  color: #fff;
+  cursor: pointer;
+}
+button:last-child {
+  background: #aaa;
+}
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: #fff;
+  color: #222;
+  padding: 32px;
+  border-radius: 12px;
+  min-width: 320px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+textarea {
+  width: 100%;
+  min-height: 60px;
+  margin: 12px 0;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  resize: vertical;
+}

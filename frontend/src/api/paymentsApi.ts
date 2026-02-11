@@ -7,13 +7,15 @@ import { api } from "./client";
 
 export interface PaymentCreateRequest {
   orderId: number;
-  orderIdString: string;
+  paymentKey?: string;
 }
 
 export interface PaymentConfirmRequest {
   paymentKey: string;
-  orderId: string;
-  amount: number;
+}
+
+export interface PaymentCancelRequest {
+  cancelReason: string;
 }
 
 /* =====================
@@ -39,8 +41,8 @@ export const paymentsApi = {
    * 결제 취소
    * POST /api/payments/{paymentKey}/cancel
    */
-  cancelPayment: (paymentKey: string) =>
-    api.post(`/api/payments/${paymentKey}/cancel`),
+  cancelPayment: (paymentKey: string, data: PaymentCancelRequest) =>
+    api.post(`/api/payments/${paymentKey}/cancel`, data),
 
   /**
    * 결제 단건 조회 (paymentKey 기준)
@@ -51,8 +53,9 @@ export const paymentsApi = {
 
   /**
    * 주문 기준 결제 조회
-   * GET /api/payments/orders/{orderIdString}
+   * GET /api/payments/orders/{orderNumber}
    */
-  getPaymentByOrderId: (orderIdString: string) =>
-    api.get(`/api/payments/orders/${orderIdString}`),
+  getPaymentByOrderNumber: (orderNumber: string) =>
+    api.get(`/api/payments/orders/${orderNumber}`),
 };
+
