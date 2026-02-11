@@ -26,18 +26,18 @@ export interface TokenRequest {
 ===================== */
 export const authApi = {
   signup: (data: SignupRequest) =>
-    api.post("/api/auth/signup", data),
+    api.post("/auth/signup", data),
 
   login: (data: LoginRequest) =>
-    api.post("/api/auth/login", data),
+    api.post("/auth/login", data),
 
   reissue: (data: TokenRequest) =>
-    api.post("/api/auth/reissue", data),
+    api.post("/auth/reissue", data),
 
   logout: () =>
-    api.post("/api/auth/logout"),
+    api.post("/auth/logout"),
 
   // 카카오 로그인
   kakaoLogin: (code: string) =>
-    api.get("/api/auth/kakao/callback", { params: { code } }),
+    api.get("/auth/kakao/callback", { params: { code } }),
 };

@@ -19,16 +19,16 @@ export interface OrderUpdateRequest {
 ===================== */
 export const orderApi = {
   createOrder: (data: OrderCreateRequest) =>
-    api.post("/api/orders", data),
+    api.post("/orders", data),
 
   getOrder: (orderId: number) =>
-    api.get(`/api/orders/${orderId}`),
+    api.get(`/orders/${orderId}`),
 
   deleteOrder: (orderId: number) =>
-    api.delete(`/api/orders/${orderId}`),
+    api.delete(`/orders/${orderId}`),
 
   getOrderItem: (orderId: number, orderItemId: number) =>
-    api.get(`/api/orders/${orderId}/orderItems/${orderItemId}`),
+    api.get(`/orders/${orderId}/orderItems/${orderItemId}`),
 
   updateOrderItem: (
     orderId: number,
@@ -36,7 +36,7 @@ export const orderApi = {
     data: OrderUpdateRequest
   ) =>
     api.patch(
-      `/api/orders/${orderId}/orderItems/${orderItemId}`,
+      `/orders/${orderId}/orderItems/${orderItemId}`,
       data
     ),
 };

@@ -28,14 +28,14 @@ export const paymentsApi = {
    * POST /api/payments
    */
   createPayment: (data: PaymentCreateRequest) =>
-    api.post("/api/payments", data),
+    api.post("/payments", data),
 
   /**
    * 결제 승인 (PG 결제 성공 후 호출)
    * POST /api/payments/confirm
    */
   confirmPayment: (data: PaymentConfirmRequest) =>
-    api.post("/api/payments/confirm", data),
+    api.post("/payments/confirm", data),
 
   /**
    * 결제 취소
