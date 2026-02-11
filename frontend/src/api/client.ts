@@ -1,8 +1,9 @@
 import axios from "axios";
 
 
-const awsUrl = import.meta.env.VITE_AWS_API_URL || "http://43.201.115.73:8080";
-const baseURL = awsUrl;
+// const awsUrl = "http://43.201.115.73:8080";
+const localUrl = "http://localhost:8080";
+const baseURL = localUrl;
 export const api = axios.create({
   baseURL,
   withCredentials: true,
