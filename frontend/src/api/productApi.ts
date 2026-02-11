@@ -24,28 +24,28 @@ export interface ProductQuery {
 ===================== */
 export const productApi = {
   getProducts: (params?: ProductQuery) =>
-    api.get("/api/products", { params }),
+    api.get("/products", { params }),
 
   getProduct: (productId: number) =>
-    api.get(`/api/products/${productId}`),
+    api.get(`/products/${productId}`),
 
   /* =====================
      Admin API
   ===================== */
   createProduct: (data: ProductRequest) =>
-    api.post("/api/admin/products", data),
+    api.post("/admin/products", data),
 
   updateProduct: (productId: number, data: ProductRequest) =>
-    api.put(`/api/admin/products/${productId}`, data),
+    api.put(`/admin/products/${productId}`, data),
 
   deleteProduct: (productId: number) =>
-    api.delete(`/api/admin/products/${productId}`),
+    api.delete(`/admin/products/${productId}`),
 
   // 상품 이미지 업로드
   uploadProductImage: (productId: number, file: File) => {
     const formData = new FormData();
     formData.append("file", file);
-    return api.post(`/api/admin/products/${productId}/image`, formData, {
+    return api.post(`/admin/products/${productId}/image`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

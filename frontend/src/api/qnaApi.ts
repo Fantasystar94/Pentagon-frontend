@@ -35,29 +35,29 @@ export interface QnaQuery {
 export const qnaApi = {
   // QnA 목록 조회
   getQnaList: (params?: QnaQuery) =>
-    api.get("/api/qnas", { params }),
+    api.get("/qnas", { params }),
 
   // QnA 상세 조회
   getQna: (qnaId: number) =>
-    api.get(`/api/qnas/${qnaId}`),
+    api.get(`/qnas/${qnaId}`),
 
   // QnA 등록
   registerQna: (userId: number, data: QnaResisterRequest) =>
-    api.post(`/api/qnas/${userId}`, data),
+    api.post(`/qnas/${userId}`, data),
 
   // QnA 수정
   updateQna: (qnaId: number, data: QnaUpdateRequest) =>
-    api.put(`/api/qnas/${qnaId}`, data),
+    api.put(`/qnas/${qnaId}`, data),
 
   // QnA 삭제
   deleteQna: (qnaId: number) =>
-    api.delete(`/api/qnas/${qnaId}`),
+    api.delete(`/qnas/${qnaId}`),
 
   // 관리자 답변 등록
   answerQna: (qnaId: number, data: QnaAdminAnswerRequest) =>
-    api.post(`/api/admin/qna/${qnaId}`, data),
+    api.post(`/admin/qna/${qnaId}`, data),
 
   // 관리자 답변 수정
   updateQnaAnswer: (qnaId: number, data: QnaAdminAnswerUpdateRequest) =>
-    api.put(`/api/admin/qna/${qnaId}`, data),
+    api.put(`/admin/qna/${qnaId}`, data),
 };

@@ -42,20 +42,20 @@ export const paymentsApi = {
    * POST /api/payments/{paymentKey}/cancel
    */
   cancelPayment: (paymentKey: string, data: PaymentCancelRequest) =>
-    api.post(`/api/payments/${paymentKey}/cancel`, data),
+    api.post(`/payments/${paymentKey}/cancel`, data),
 
   /**
    * 결제 단건 조회 (paymentKey 기준)
    * GET /api/payments/{paymentKey}
    */
   getPaymentByPaymentKey: (paymentKey: string) =>
-    api.get(`/api/payments/${paymentKey}`),
+    api.get(`/payments/${paymentKey}`),
 
   /**
    * 주문 기준 결제 조회
    * GET /api/payments/orders/{orderNumber}
    */
   getPaymentByOrderNumber: (orderNumber: string) =>
-    api.get(`/api/payments/orders/${orderNumber}`),
+    api.get(`/payments/orders/${orderNumber}`),
 };
 

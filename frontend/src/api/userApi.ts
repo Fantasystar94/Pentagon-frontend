@@ -20,21 +20,21 @@ export interface UserWithdrawRequest {
 export const userApi = {
   // 사용자 프로필 조회
   getProfile: (userId: number) =>
-    api.get(`/api/users/${userId}`),
+    api.get(`/users/${userId}`),
 
   // 사용자 프로필 수정
   updateProfile: (userId: number, data: UserUpdateRequest) =>
-    api.put(`/api/users/${userId}`, data),
+    api.put(`/users/${userId}`, data),
 
   // 회원 탈퇴
   withdrawUser: (userId: number, data: UserWithdrawRequest) =>
-    api.delete(`/api/users/${userId}`, { data }),
+    api.delete(`/users/${userId}`, { data }),
 
   // 프로필 이미지 업로드
   uploadProfileImage: (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
-    return api.post("/api/users/profile-image", formData, {
+    return api.post("/users/profile-image", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
