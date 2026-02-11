@@ -1,9 +1,9 @@
 import axios from "axios";
 
 
-// const awsUrl = "http://43.201.115.73:8080";
-const localUrl = "http://localhost:8080";
-const baseURL = localUrl;
+const awsUrl = "http://43.201.115.73:8080";
+const _localUrl = "http://localhost:8080";
+const baseURL = awsUrl;
 export const api = axios.create({
   baseURL,
   withCredentials: true,
