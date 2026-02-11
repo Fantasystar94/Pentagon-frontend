@@ -34,8 +34,6 @@ export default function PaymentSuccess() {
       try {
         const res = await paymentsApi.confirmPayment({
           paymentKey,
-          orderId,
-          amount: Number(amount),
         });
 
         console.log("결제 승인 성공", res.data);

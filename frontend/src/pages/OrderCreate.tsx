@@ -35,7 +35,6 @@ const handlePayment = async () => {
     // 2️⃣ 결제 요청 (Payment 생성)
     await paymentsApi.createPayment({
       orderId,
-      orderIdString,
     });
 
     // 3️⃣ 토스 결제창 호출

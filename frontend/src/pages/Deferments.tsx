@@ -37,10 +37,6 @@ export default function Deferments() {
   const [message, setMessage] = useState({ type: "", text: "" });
 
   // 어드민 처리용 상태
-  const [processingData, setProcessingData] = useState<{
-    defermentsId: number;
-    decisionStatus: string;
-  } | null>(null);
   const [processingLoading, setProcessingLoading] = useState(false);
 
   // 초기화 및 권한 확인

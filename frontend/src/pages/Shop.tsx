@@ -7,9 +7,11 @@ export default function Shop() {
   const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
-    productApi.getProductList().then(res => {
-      setProducts(res.data.data);
-    });
+    const fetchProducts = async () => {
+      const res = await productApi.getProducts();
+      setProducts(res.data?.data?.content ?? res.data?.data ?? []);
+    };
+    fetchProducts();
   }, []);
 
   return (
