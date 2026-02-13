@@ -141,7 +141,9 @@ export default function Home() {
           <div style={styles.cardCenter}>
             <h4>실시간 상담</h4>
             <div style={styles.robotIcon}>🤖</div>
-            <button style={styles.primaryBtn}>상담 시작</button>
+            <button style={styles.primaryBtn} onClick={() => navigate("/chat")}>
+              상담 시작
+            </button>
           </div>
 
           <div style={styles.card}>

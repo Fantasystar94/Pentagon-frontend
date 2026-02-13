@@ -7,7 +7,7 @@ import { api } from "./client";
 export interface UserUpdateRequest {
   email?: string;
   currentPassword: string;
-  newPassword: string;
+  newPassword?: string;
 }
 
 export interface UserWithdrawRequest {

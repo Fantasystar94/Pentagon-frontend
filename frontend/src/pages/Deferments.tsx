@@ -56,21 +56,66 @@ export default function Deferments() {
   }, [isInitialized, isLoggedIn, isAdmin, userId, navigate]);
 
   // 유저: 본인의 연기 신청 조회
-  const fetchUserDeferments = () => {
+  const fetchUserDeferments = async () => {
+    if (!userId) {
+      setDeferments([]);
+      return;
+    }
+
     setLoading(true);
-    enlistmentApi
-      .getDeferment(userId!)
-      .then((res) => {
-        console.log("연기 신청 정보:", res.data?.data);
-        setDeferments(Array.isArray(res.data?.data) ? res.data?.data : [res.data?.data]);
-      })
-      .catch((err) => {
-        console.error("연기 신청 조회 실패:", err);
-        setDeferments([]);
-      })
-      .finally(() => {
-        setLoading(false);
+    try {
+      const appRes = await enlistmentApi.getApplicationList();
+      const appData = appRes.data?.data;
+      const appList = Array.isArray(appData) ? appData : appData?.content || [];
+
+      const myApps = appList.filter((app: any) => {
+        const appUserId = app.userId ?? app.user_id ?? app.memberId ?? app.accountId;
+        return appUserId === userId;
       });
+
+      const toNumber = (value: any) => {
+        if (typeof value === "number" && Number.isFinite(value)) return value;
+        const parsed = parseInt(String(value ?? ""), 10);
+        return Number.isFinite(parsed) ? parsed : null;
+      };
+
+      const candidateIds: Array<number | null> = myApps.map((app: any) =>
+        toNumber(
+          app.defermentsId ??
+            app.defermentId ??
+            app.deferment_id ??
+            app.deferId
+        )
+      );
+
+      const defermentIds: number[] = Array.from(
+        new Set(candidateIds.filter((id): id is number => typeof id === "number"))
+      );
+
+      if (defermentIds.length === 0) {
+        setDeferments([]);
+        return;
+      }
+
+      const results = await Promise.all(
+        defermentIds.map((defermentsId) =>
+          enlistmentApi
+            .getDeferment(defermentsId)
+            .then((res) => res.data?.data)
+            .catch((err) => {
+              console.error("연기 신청 상세 조회 실패:", err);
+              return null;
+            })
+        )
+      );
+
+      setDeferments(results.filter(Boolean));
+    } catch (err) {
+      console.error("연기 신청 조회 실패:", err);
+      setDeferments([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 어드민: 모든 연기 신청 조회
@@ -242,15 +287,6 @@ export default function Deferments() {
         ) : (
           // ========== 유저 페이지 ==========
           <section style={styles.section}>
-            <div style={styles.userHeader}>
-              <h1 style={styles.title}>연기 신청</h1>
-              <button
-                onClick={() => setShowApplyModal(true)}
-                style={styles.primaryBtn}
-              >
-                새로운 연기 신청
-              </button>
-            </div>
 
             {loading ? (
               <p style={styles.loadingMessage}>로딩 중...</p>

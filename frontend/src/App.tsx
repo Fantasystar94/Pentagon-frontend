@@ -10,10 +10,14 @@ import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import OrderCreate from "./pages/OrderCreate";
 import OrderComplete from "./pages/OrderComplete";
+import Orders from "./pages/Orders";
+import Cart from "./pages/Cart";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentFail from "./pages/PaymentFail";
 import Notices from "./pages/Notices";
 import NoticeDetail from "./pages/NoticeDetail";
 import MyPage from "./pages/MyPage";
+import Chat from "./pages/Chat";
 
 function App() {
   return (
@@ -22,6 +26,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/:productId" element={<ProductDetail />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/orders" element={<Orders />} />
         <Route path="/orders/new" element={<OrderCreate />} />
         <Route path="/orders/complete" element={<OrderComplete />} />
         <Route path="/login" element={<Login />} />
@@ -33,7 +39,9 @@ function App() {
         <Route path="/notices" element={<Notices />} />
         <Route path="/notices/:id" element={<NoticeDetail />} />
         <Route path="/mypage" element={<MyPage />} />
+        <Route path="/chat" element={<Chat />} />
         <Route path="/payments/success" element={<PaymentSuccess />} />
+        <Route path="/payments/fail" element={<PaymentFail />} />
       </Routes>
     </BrowserRouter>
   );

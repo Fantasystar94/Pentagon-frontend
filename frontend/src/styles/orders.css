@@ -1,0 +1,40 @@
+.orders-page {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.orders-title {
+  font-size: 22px;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.orders-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.orders-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+}
+
+.orders-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  color: #222;
+}
+
+.orders-muted {
+  color: #666;
+}
+
+.orders-error {
+  color: #c33;
+}

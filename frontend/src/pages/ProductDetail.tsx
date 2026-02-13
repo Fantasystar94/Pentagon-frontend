@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { productApi } from "../api/productApi";
 import Header from "../components/Header";
 import QuantitySelector from "../components/QuantitySelector";
+import { addToCart } from "../store/cartStorage";
+import "../styles/productDetail.css";
 
 export default function ProductDetail() {
   const { productId } = useParams();
@@ -30,6 +32,26 @@ export default function ProductDetail() {
     });
   };
 
+  const handleAddToCart = () => {
+    if (qty > product.stock) {
+      alert("재고 수량이 충분하지 않습니다.");
+      return;
+    }
+
+    addToCart(
+      {
+        productId: product.productId,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        stock: product.stock,
+        productImageUrl: product.productImageUrl,
+      },
+      qty
+    );
+    alert("장바구니에 담았습니다.");
+  };
+
   if (!product) return null;
 
   return (
@@ -37,11 +59,9 @@ export default function ProductDetail() {
       <Header />
       <main className="product-detail">
         {product.productImageUrl && (
-          <img
-            src={product.productImageUrl}
-            alt={product.name}
-            style={{ width: "100%", maxWidth: 480, borderRadius: 8, marginBottom: 16 }}
-          />
+          <div className="product-image-wrap">
+            <img src={product.productImageUrl} alt={product.name} loading="lazy" />
+          </div>
         )}
         <h3>{product.name}</h3>
         <p>{product.description}</p>
@@ -49,7 +69,10 @@ export default function ProductDetail() {
 
         <QuantitySelector value={qty} onChange={setQty} />
 
-        <button onClick={handleBuy}>구매하기</button>
+        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+          <button onClick={handleAddToCart}>장바구니 담기</button>
+          <button onClick={handleBuy}>구매하기</button>
+        </div>
       </main>
     </>
   );

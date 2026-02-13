@@ -6,12 +6,14 @@ export default function OrderComplete() {
   const { state } = useLocation();
   const navigate = useNavigate();
 
+  const orderId = state?.order?.id ?? state?.payment?.orderId ?? state?.payment?.order_id;
+
   return (
     <>
       <Header />
       <main>
         <h2>구매가 완료되었습니다</h2>
-        <p>주문번호: {state.order.id}</p>
+        <p>주문번호: {orderId ?? "-"}</p>
 
         <button onClick={() => navigate("/orders")}>
           주문 목록

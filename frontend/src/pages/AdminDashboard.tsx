@@ -5,6 +5,7 @@ import { dashboardApi } from '../api/dashboardApi';
 import { adminNoticeApi } from '../api/adminNoticeApi';
 import { adminProductApi } from '../api/adminProductApi';
 import '../styles/adminDashboard.css';
+
 interface EnlistmentApplication {
   applicationId: number;
   userId: number;

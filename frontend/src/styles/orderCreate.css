@@ -1,0 +1,133 @@
+.order-create-page {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  color: #111;
+}
+
+.order-create-title {
+  margin: 0 0 6px;
+  font-size: 22px;
+  color: #111;
+}
+
+.order-create-subtitle {
+  margin: 0 0 16px;
+  color: #333;
+}
+
+.order-create-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  padding: 16px;
+}
+
+.order-create-item {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 16px;
+}
+
+.order-create-thumb {
+  width: 140px;
+  height: 140px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #eee;
+}
+
+.order-create-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.order-create-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+.order-create-name {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: #111;
+}
+
+.order-create-desc {
+  margin: 0 0 12px;
+  color: #333;
+  font-size: 13px;
+}
+
+.order-create-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid #eee;
+  color: #111;
+}
+
+.order-create-row.total {
+  border-top: 1px solid #ddd;
+}
+
+.order-create-label {
+  color: #111;
+  font-weight: 600;
+}
+
+.order-create-value {
+  color: #111;
+  font-weight: 600;
+}
+
+.order-create-total {
+  color: #111;
+  font-weight: 800;
+}
+
+.order-create-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.order-create-btn {
+  border: none;
+  background: #4a6cf7;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.order-create-btn.ghost {
+  background: transparent;
+  color: #4a6cf7;
+  border: 1px solid #4a6cf7;
+}
+
+@media (max-width: 640px) {
+  .order-create-item {
+    grid-template-columns: 1fr;
+  }
+
+  .order-create-thumb {
+    width: 100%;
+    height: 200px;
+  }
+
+  .order-create-actions {
+    justify-content: stretch;
+  }
+
+  .order-create-actions .order-create-btn {
+    flex: 1;
+  }
+}

@@ -17,10 +17,13 @@ export default function Header() {
       </div>
 
       <nav style={styles.nav}>
+        <Link to="/products">상품</Link>
         <Link to="/enlistment">입영 일정</Link>
         <Link to="/deferments">연기 신청</Link>
         <Link to="/notices">공지사항</Link>
         <Link to="/qna">QnA</Link>
+        {isLoggedIn && <Link to="/cart">장바구니</Link>}
+        {isLoggedIn && <Link to="/orders">주문내역</Link>}
         {isLoggedIn && isAdmin && <Link to="/admin">어드민</Link>}
       </nav>
 
