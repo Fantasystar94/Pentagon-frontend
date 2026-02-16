@@ -34,13 +34,13 @@ export default function Orders() {
               const res = await orderApi.getOrder(id);
               const data = res.data?.data;
               return {
-                id: data?.id ?? id,
-                status: data?.status,
-                totalPrice: data?.totalPrice,
-                createdAt: data?.createdAt,
+                id: (data as any)?.id ?? id,
+                status: (data as any)?.status,
+                totalPrice: (data as any)?.totalPrice ?? (data as any)?.total_price,
+                createdAt: (data as any)?.createdAt ?? (data as any)?.created_at,
                 raw: data,
               } as OrderSummary;
-            } catch (e) {
+            } catch {
               return { id, raw: null } as OrderSummary;
             }
           })
@@ -85,13 +85,17 @@ export default function Orders() {
                 <div className="orders-row">
                   <strong>금액</strong>
                   <span>
-                    {typeof o.totalPrice === "number" ? `${o.totalPrice.toLocaleString()}원` : "-"}
+                    {typeof o.totalPrice === "number"
+                      ? `${o.totalPrice.toLocaleString()}원`
+                      : "-"}
                   </span>
                 </div>
                 <div className="orders-row">
                   <strong>생성일</strong>
                   <span>
-                    {o.createdAt ? new Date(o.createdAt).toLocaleString("ko-KR") : "-"}
+                    {o.createdAt
+                      ? new Date(o.createdAt).toLocaleString("ko-KR")
+                      : "-"}
                   </span>
                 </div>
 

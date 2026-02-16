@@ -54,9 +54,7 @@ export default function MyPage() {
           email: profile?.email || "",
         }));
       })
-      .catch((err) => {
-        console.error("사용자 정보 조회 실패:", err);
-      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, [isInitialized, isLoggedIn, userId, navigate]);
 
@@ -70,16 +68,119 @@ export default function MyPage() {
   const fetchMyApplications = async () => {
     setEnlistLoading(true);
     try {
-      const res = await enlistmentApi.getApplicationList();
-      const data = res.data?.data;
-      const list = Array.isArray(data) ? data : data?.content || [];
-      const filtered = list.filter((app: any) => {
-        const appUserId = app.userId ?? app.user_id ?? app.memberId ?? app.accountId;
-        return appUserId === userId;
-      });
-      setMyApplications(filtered.length ? filtered : list);
+      const toNumberOrNull = (value: any): number | null => {
+        if (value == null || value === "") return null;
+        const n = typeof value === "number" ? value : Number(value);
+        return Number.isFinite(n) ? n : null;
+      };
+
+      const isSameUser = (appUserId: any) => {
+        const a = toNumberOrNull(appUserId);
+        const b = toNumberOrNull(userId);
+        if (a == null || b == null) return false;
+        return a === b;
+      };
+
+      const parseTimeMs = (value?: string): number => {
+        if (!value) return NaN;
+        const direct = Date.parse(value);
+        if (!Number.isNaN(direct)) return direct;
+
+        const trimmed = value.trim();
+        const normalized = trimmed.replace(" ", "T");
+        const microFixed = normalized.replace(/\.(\d{3})\d+$/, ".$1");
+        const fixed = Date.parse(microFixed);
+        if (!Number.isNaN(fixed)) return fixed;
+
+        const noFraction = normalized.replace(/\.(\d+)$/, "");
+        return Date.parse(noFraction);
+      };
+
+      const getAppUserId = (app: any) =>
+        app?.userId ?? app?.user_id ?? app?.memberId ?? app?.accountId;
+
+      const getAppId = (app: any) =>
+        app?.applicationId ?? app?.id ?? app?.application_id ?? null;
+
+      const normalize = (payload: any) => {
+        if (Array.isArray(payload)) return payload;
+        if (Array.isArray(payload?.content)) return payload.content;
+        return [];
+      };
+
+      const pickLatestOne = (apps: any[]) => {
+        if (!apps.length) return null;
+        const copy = [...apps];
+        copy.sort((a, b) => {
+          const at = parseTimeMs(a?.createdAt ?? a?.created_at);
+          const bt = parseTimeMs(b?.createdAt ?? b?.created_at);
+          if (Number.isNaN(at) || Number.isNaN(bt)) return 0;
+          return bt - at;
+        });
+        return copy[0] ?? null;
+      };
+
+      // 1) 목록 조회 (가능하면 userId/정렬/페이징으로 최소화)
+      let list: any[] = [];
+      if (userId != null) {
+        try {
+          const res = await enlistmentApi.getApplicationList({
+            userId: userId ?? undefined,
+            page: 0,
+            size: 50,
+            sort: "createdAt",
+            direction: "desc",
+          });
+          list = normalize(res.data?.data);
+        } catch {
+          list = [];
+        }
+      }
+
+      if (list.length === 0) {
+        const res = await enlistmentApi.getApplicationList();
+        list = normalize(res.data?.data);
+      }
+
+      // 2) 내 applicationId 1개만 선택
+      const mine = userId != null ? list.filter((app: any) => isSameUser(getAppUserId(app))) : [];
+
+      // 목록에 userId 필드가 존재하는데 내 것 매칭이 0이면, 타유저 데이터일 가능성이 높으니 비움
+      const listHasUserIdField = list.some((app: any) => getAppUserId(app) != null);
+      if (userId != null && listHasUserIdField && mine.length === 0) {
+        setMyApplications([]);
+        return;
+      }
+
+      // userId 필드가 아예 없으면(검증 불가) 일단 목록이 내 것이라고 가정하고 최신 1건 선택
+      const picked = pickLatestOne(mine.length ? mine : list);
+      const applicationId = picked ? getAppId(picked) : null;
+
+      if (!applicationId) {
+        setMyApplications([]);
+        return;
+      }
+
+      // 3) 상세 단건 조회
+      const detailRes = await enlistmentApi.getApplication(Number(applicationId));
+      const detail = detailRes.data?.data ?? detailRes.data;
+      if (!detail) {
+        setMyApplications([]);
+        return;
+      }
+
+      // 상세에도 userId가 있으면 로그인 유저와 일치하는지 검증
+      if (userId != null) {
+        const detailUserId = getAppUserId(detail);
+        if (detailUserId != null && !isSameUser(detailUserId)) {
+          setMyApplications([]);
+          return;
+        }
+      }
+
+      setMyApplications([detail]);
     } catch (err) {
-      console.error("입영 일정 조회 실패:", err);
+      // ignore
     } finally {
       setEnlistLoading(false);
     }
@@ -92,7 +193,7 @@ export default function MyPage() {
       const list = Array.isArray(data) ? data : data?.content || [];
       setScheduleOptions(list);
     } catch (err) {
-      console.error("입영 일정 목록 조회 실패:", err);
+      // ignore
     }
   };
 
@@ -101,7 +202,7 @@ export default function MyPage() {
       await enlistmentApi.cancelApplication(applicationId);
       fetchMyApplications();
     } catch (err) {
-      console.error("입영 신청 취소 실패:", err);
+      // ignore
     }
   };
 
@@ -128,10 +229,11 @@ export default function MyPage() {
         reasonDetail: deferForm.reasonDetail,
         scheduleId: deferForm.scheduleId,
       });
+
       setShowDeferModal(false);
       fetchMyApplications();
     } catch (err) {
-      console.error("연기 신청 실패:", err);
+      // ignore
     }
   };
 
@@ -194,7 +296,6 @@ export default function MyPage() {
         }, 1500);
       })
       .catch((err) => {
-        console.error("프로필 수정 실패:", err);
         setMessage({
           type: "error",
           text: err.response?.data?.message || "정보 수정에 실패했습니다.",
@@ -207,6 +308,43 @@ export default function MyPage() {
     logout();
     navigate("/login");
   };
+
+  const toNumberOrNull = (value: any): number | null => {
+    if (value == null || value === "") return null;
+    const n = typeof value === "number" ? value : Number(value);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const parseTimeMs = (value?: string): number => {
+    if (!value) return NaN;
+    const direct = Date.parse(value);
+    if (!Number.isNaN(direct)) return direct;
+
+    const trimmed = value.trim();
+    const normalized = trimmed.replace(" ", "T");
+    const microFixed = normalized.replace(/\.(\d{3})\d+$/, ".$1");
+    const fixed = Date.parse(microFixed);
+    if (!Number.isNaN(fixed)) return fixed;
+
+    const noFraction = normalized.replace(/\.(\d+)$/, "");
+    return Date.parse(noFraction);
+  };
+
+  const formatDateOnly = (value?: string) => {
+    const ms = parseTimeMs(value);
+    if (Number.isNaN(ms)) return "-";
+    return new Date(ms).toLocaleDateString("ko-KR");
+  };
+
+  const visibleApplications = myApplications.filter((app) => {
+    if (!app) return false;
+    const id = app.applicationId ?? app.id ?? app.application_id;
+    const enlistmentDate = app.enlistmentDate ?? app.enlistment_date;
+    const status = app.status ?? app.decisionStatus ?? app.decision_status;
+    const createdAt = app.createdAt ?? app.created_at;
+    const hasAnyValue = Boolean(enlistmentDate || status || createdAt);
+    return toNumberOrNull(id) != null && hasAnyValue;
+  });
 
   if (!isLoggedIn) {
     return null;
@@ -276,7 +414,7 @@ export default function MyPage() {
                 <h2 className="mypage-section-title">내 입영 일정</h2>
                 {enlistLoading ? (
                   <div className="mypage-loading">로딩 중...</div>
-                ) : myApplications.length === 0 ? (
+                ) : visibleApplications.length === 0 ? (
                   <div className="mypage-empty">입영 신청 내역이 없습니다.</div>
                 ) : (
                   <div className="mypage-table-wrapper">
@@ -291,32 +429,34 @@ export default function MyPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {myApplications.map((app) => (
+                        {visibleApplications.map((app) => (
                           <tr key={app.applicationId || app.id}>
-                            <td>{app.applicationId || app.id}</td>
+                            <td>{app.applicationId ?? app.id ?? app.application_id}</td>
                             <td>
-                              {app.enlistmentDate
-                                ? new Date(app.enlistmentDate).toLocaleDateString("ko-KR")
-                                : "-"}
+                              {formatDateOnly(app.enlistmentDate ?? app.enlistment_date)}
                             </td>
-                            <td>{app.status || "-"}</td>
+                            <td>{app.status ?? app.decisionStatus ?? app.decision_status ?? "-"}</td>
                             <td>
-                              {app.createdAt
-                                ? new Date(app.createdAt).toLocaleDateString("ko-KR")
-                                : "-"}
+                              {formatDateOnly(app.createdAt ?? app.created_at)}
                             </td>
                             <td className="mypage-table-actions">
                               <button
                                 className="mypage-secondary-btn"
                                 onClick={() =>
-                                  handleCancelApplication(app.applicationId || app.id)
+                                  handleCancelApplication(
+                                    Number(app.applicationId ?? app.id ?? app.application_id)
+                                  )
                                 }
                               >
                                 취소
                               </button>
                               <button
                                 className="mypage-ghost-btn"
-                                onClick={() => handleOpenDeferModal(app.applicationId || app.id)}
+                                onClick={() =>
+                                  handleOpenDeferModal(
+                                    Number(app.applicationId ?? app.id ?? app.application_id)
+                                  )
+                                }
                               >
                                 연기 신청
                               </button>

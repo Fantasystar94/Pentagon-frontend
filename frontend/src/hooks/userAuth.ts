@@ -13,7 +13,6 @@ function decodeToken(token: string): any {
     );
     return JSON.parse(jsonPayload);
   } catch (e) {
-    console.error("토큰 디코드 실패:", e);
     return null;
   }
 }
@@ -21,6 +20,7 @@ function decodeToken(token: string): any {
 export function useAuth() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
+  const [username, setUsername] = useState<string>("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -63,6 +63,33 @@ export function useAuth() {
         setUserId(id);
       }
 
+      // username은 Login에서 localStorage에 저장해두므로 그 값을 우선 사용
+      const storedUsername = localStorage.getItem("username") || "";
+      if (storedUsername.trim()) {
+        setUsername(storedUsername.trim());
+      } else {
+        // 토큰에서 username 추출 (백엔드 클레임 명이 다양할 수 있어 후보군 처리)
+        const decodedForName = decodeToken(token);
+        const nameCandidates = [
+          decodedForName?.username,
+          decodedForName?.userName,
+          decodedForName?.name,
+          decodedForName?.nickname,
+          decodedForName?.email,
+        ];
+        let extractedName = "";
+        for (const value of nameCandidates) {
+          if (typeof value === "string" && value.trim()) {
+            extractedName = value.trim();
+            break;
+          }
+        }
+        if (!extractedName && typeof decodedForName?.sub === "string") {
+          extractedName = decodedForName.sub;
+        }
+        setUsername(extractedName);
+      }
+
       // 어드민 여부 확인
       const decoded = decodeToken(token);
       const role = decoded?.userRole || decoded?.authorities || "";
@@ -73,6 +100,7 @@ export function useAuth() {
       setIsAdmin(isAdminUser);
     } else {
       setIsLoggedIn(false);
+      setUsername("");
     }
     
     setIsInitialized(true);
@@ -83,12 +111,14 @@ export function useAuth() {
     localStorage.removeItem("userId");
     setIsLoggedIn(false);
     setUserId(null);
+    setUsername("");
     setIsAdmin(false);
   };
 
   return {
     isLoggedIn,
     userId,
+    username,
     isAdmin,
     isInitialized,
     logout,

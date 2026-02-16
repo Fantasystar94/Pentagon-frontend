@@ -8,16 +8,18 @@ import QnA from './pages/QnA';
 import AdminDashboard from './pages/AdminDashboard';
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
-import OrderCreate from "./pages/OrderCreate";
+import OrderCreate from "./pages/OrderCreate.tsx";
 import OrderComplete from "./pages/OrderComplete";
-import Orders from "./pages/Orders";
+import Orders from "./pages/Orders.tsx";
 import Cart from "./pages/Cart";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import PaymentFail from "./pages/PaymentFail";
+import PaymentSuccess from "./pages/PaymentSuccess.tsx";
+import PaymentFail from "./pages/PaymentFail.tsx";
 import Notices from "./pages/Notices";
 import NoticeDetail from "./pages/NoticeDetail";
 import MyPage from "./pages/MyPage";
 import Chat from "./pages/Chat";
+import Search from "./pages/Search.tsx";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -40,9 +42,11 @@ function App() {
         <Route path="/notices/:id" element={<NoticeDetail />} />
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/chat" element={<Chat />} />
+        <Route path="/search" element={<Search />} />
         <Route path="/payments/success" element={<PaymentSuccess />} />
         <Route path="/payments/fail" element={<PaymentFail />} />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }

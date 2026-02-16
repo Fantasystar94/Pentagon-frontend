@@ -11,16 +11,20 @@ export default function OrderComplete() {
   return (
     <>
       <Header />
-      <main>
-        <h2>구매가 완료되었습니다</h2>
-        <p>주문번호: {orderId ?? "-"}</p>
+      <main className="order-complete-page">
+        <section className="complete-card">
+          <h2>구매가 완료되었습니다</h2>
+          <p className="desc">주문번호: {orderId ?? "-"}</p>
 
-        <button onClick={() => navigate("/orders")}>
-          주문 목록
-        </button>
-        <button onClick={() => navigate("/")}>
-          메인페이지
-        </button>
+          <div className="actions">
+            <button className="primary" onClick={() => navigate("/orders")}>
+              주문 목록
+            </button>
+            <button className="secondary" onClick={() => navigate("/")}>
+              메인페이지
+            </button>
+          </div>
+        </section>
       </main>
     </>
   );

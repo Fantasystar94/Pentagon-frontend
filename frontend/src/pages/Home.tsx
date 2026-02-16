@@ -6,11 +6,13 @@ import { userApi } from "../api/userApi";
 import { weatherApi } from "../api/weatherApi";
 import { enlistmentApi } from "../api/enlistmentApi";
 import { noticeApi } from "../api/noticeApi";
+import "../styles/home.css";
 
 export default function Home() {
   const navigate = useNavigate();
   const { isLoggedIn, userId } = useAuth();
   const [detailedUserInfo, setDetailedUserInfo] = useState<any>(null);
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [loading, setLoading] = useState(false);
   const [weather, setWeather] = useState<any>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
@@ -29,12 +31,9 @@ export default function Home() {
       userApi
         .getProfile(userId)
         .then((res) => {
-          console.log("사용자 상세정보:", res.data?.data);
           setDetailedUserInfo(res.data?.data);
         })
-        .catch((err) => {
-          console.error("사용자 정보 조회 실패:", err);
-        })
+        .catch(() => {})
         .finally(() => {
           setLoading(false);
         });
@@ -47,16 +46,19 @@ export default function Home() {
     weatherApi
       .getTodayWeather()
       .then((res) => {
-        console.log("날씨 정보:", res.data?.data);
         setWeather(res.data?.data);
       })
-      .catch((err) => {
-        console.error("날씨 정보 조회 실패:", err);
-      })
+      .catch(() => {})
       .finally(() => {
         setWeatherLoading(false);
       });
   }, []);
+
+  const handleSearch = () => {
+    const q = searchKeyword.trim();
+    if (!q) return;
+    navigate(`/search?q=${encodeURIComponent(q)}`);
+  };
 
   // 이번주 입영 일정 가져오기
   useEffect(() => {
@@ -64,12 +66,9 @@ export default function Home() {
     enlistmentApi
       .getThisWeekSummary(NX, NY)
       .then((res) => {
-        console.log("이번주 입영 일정:", res.data?.data);
         setThisWeekSchedules(res.data?.data);
       })
-      .catch((err) => {
-        console.error("이번주 입영 일정 조회 실패:", err);
-      })
+      .catch(() => {})
       .finally(() => {
         setThisWeekLoading(false);
       });
@@ -81,13 +80,10 @@ export default function Home() {
     noticeApi
       .getNoticeList({ page: 0, size: 5 })
       .then((res) => {
-        console.log("공지사항:", res.data?.data);
         const data = res.data?.data;
         setNotices(Array.isArray(data) ? data : data?.content || []);
       })
-      .catch((err) => {
-        console.error("공지사항 조회 실패:", err);
-      })
+      .catch(() => {})
       .finally(() => {
         setNoticesLoading(false);
       });
@@ -105,17 +101,25 @@ export default function Home() {
             {isLoggedIn && detailedUserInfo ? `${detailedUserInfo.username} 님, 안녕하세요?` : "안녕하세요?"}
           </h1>
 
-          <div style={styles.searchBox}>
+          <div style={styles.searchBox} className="searchBox">
             <input
               placeholder="입영 일정, 공지사항 등을 검색해보세요."
+              className="home-searchInput"
               style={styles.input}
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSearch();
+              }}
             />
-            <button style={styles.searchBtn}>검색</button>
+            <button className="home-searchBtn" style={styles.searchBtn} onClick={handleSearch}>
+              검색
+            </button>
           </div>
         </section>
 
         {/* 카드 영역 */}
-        <section style={styles.cardGrid}>
+        <section className="home-cardGrid" style={styles.cardGrid}>
           <div style={styles.card}>
             <h4>오늘 날씨</h4>
             {weatherLoading ? (
@@ -126,8 +130,7 @@ export default function Home() {
                   {weather.temperature || weather.temp || "N/A"}°
                 </p>
                 <small>
-                  최고 {weather.maxTemp || weather.tempMax || "N/A"}° / 최저{" "}
-                  {weather.minTemp || weather.tempMin || "N/A"}°
+                  하늘 상태 : <strong>{weather.skyStatus || weather.description || "정보 없음"}</strong>
                 </small>
               </>
             ) : (
@@ -285,14 +288,6 @@ export default function Home() {
           )}
         </section>
 
-        <div style={{ textAlign: "center" }}>
-          <button
-            style={styles.ctaButton}
-            onClick={() => navigate("/enlistment")}
-          >
-            입영 일정 확인하기
-          </button>
-        </div>
       </main>
     </>
   );
@@ -322,17 +317,16 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     gap: "8px",
+    flexWrap: "wrap" as const,
   } as const,
 
   input: {
-    width: "400px",
-    padding: "12px",
+    width: "min(400px, 100%)",
     borderRadius: "8px",
     border: "1px solid #ccc",
   } as const,
 
   searchBtn: {
-    padding: "12px 20px",
     borderRadius: "8px",
     backgroundColor: "#4b6bff",
     color: "white",
@@ -341,10 +335,9 @@ const styles = {
   } as const,
 
   cardGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(5, 1fr)",
     gap: "20px",
     marginBottom: "40px",
+    width: "100%",
   } as const,
 
   card: {

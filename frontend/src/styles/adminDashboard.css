@@ -18,10 +18,12 @@
 }
 .admin-dashboard-wrapper {
   display: flex;
-  gap: 32px;
-  padding: 32px;
+  gap: clamp(16px, 3vw, 32px);
+  padding: clamp(16px, 4vw, 32px);
   background: #f5f6fa;
-  min-height: 80vh;
+  min-height: calc(100dvh - 64px);
+  margin: 0 auto;
+  align-items: flex-start;
 }
 .admin-dashboard-left {
   flex: 1;
@@ -35,6 +37,18 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   padding: 24px;
   color: #222;
+  width: 100%;
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll .dashboard-table {
+  width: max-content;
+  min-width: 100%;
 }
 
 .section-header {
@@ -68,7 +82,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  align-items: center;
+  align-items: stretch;
   padding: 12px;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
@@ -76,11 +90,11 @@
   margin-bottom: 18px;
 }
 .notice-input {
-  width: 95%;
+  width: 100%;
   padding: 10px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px;
   background: #fff;
   color: #1f2937;
 }
@@ -89,13 +103,13 @@
   border-color: #0f2e5f;
 }
 .notice-textarea {
-  width: 95%;
+  width: 100%;
   min-height: 48px;
   max-height: 120px;
   padding: 10px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px;
   background: #fff;
   color: #1f2937;
   resize: none;
@@ -107,6 +121,8 @@
 .notice-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .btn-primary {
@@ -133,4 +149,44 @@
 
 .notice-table td {
   vertical-align: top;
+}
+
+@media (max-width: 900px) {
+  .admin-dashboard-wrapper {
+    flex-direction: column;
+  }
+
+  .admin-dashboard-left,
+  .admin-dashboard-right {
+    flex: unset;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-dashboard-section {
+    padding: 16px;
+    box-sizing:border-box;
+  }
+
+  .dashboard-table th,
+  .dashboard-table td {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+
+  .notice-actions {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .notice-actions .btn-primary,
+  .notice-actions .btn-ghost,
+  .notice-actions .notice-input {
+    width: 80%;
+  }
+  .notice-input, .notice-textarea {
+    width: 80%;
+    margin-bottom: 8px;
+  }
 }

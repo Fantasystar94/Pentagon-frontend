@@ -136,6 +136,7 @@
   background: #fff;
   color: var(--mypage-primary);
   border: 1px solid rgba(74, 108, 247, 0.6);
+  margin-left:20px;
 }
 
 .mypage-cancel-btn {

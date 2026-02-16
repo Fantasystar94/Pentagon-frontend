@@ -36,47 +36,54 @@ export default function Signup() {
       <div className="signup-box">
         <h2 className="signup-title">회원가입</h2>
 
-        <div className="input-group">
-          <label>이름</label>
-          <input
-            type="text"
-            placeholder="이름"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSignup();
+          }}
+        >
 
-        <div className="input-group">
-          <label>이메일</label>
-          <input
-            type="email"
-            placeholder="example@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
+          <div className="input-group">
+            <label>이름</label>
+            <input
+              type="text"
+              placeholder="이름"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
 
-        <div className="input-group">
-          <label>비밀번호</label>
-          <input
-            type="password"
-            placeholder="영문, 숫자, 특수문자 포함 8자 이상"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+          <div className="input-group">
+            <label>이메일</label>
+            <input
+              type="email"
+              placeholder="example@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
+          <div className="input-group">
+            <label>비밀번호</label>
+            <input
+              type="password"
+              placeholder="영문, 숫자, 특수문자 포함 8자 이상"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-        {error && <p className="error-text">{error}</p>}
+          {error && <p className="error-text">{error}</p>}
 
-        <button className="signup-button" onClick={handleSignup}>
-          회원가입
-        </button>
+          <button className="signup-button" type="submit">
+            회원가입
+          </button>
 
-        <div className="signup-footer">
-          <span>이미 계정이 있으신가요?</span>
-          <Link to="/login">로그인</Link>
-        </div>
+          <div className="signup-footer">
+            <span>이미 계정이 있으신가요?</span>
+            <Link to="/login">로그인</Link>
+          </div>
+        </form>
       </div>
     </div>
   );

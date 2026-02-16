@@ -1,66 +1,249 @@
-body, .qna-page {
-  background: #f5f6fa;
+.qna-page {
+  min-height: 100vh;
 }
+
 .qna-wrapper {
-  max-width: 700px;
+  max-width: 1000px;
   margin: 40px auto;
   padding: 24px;
   background: #fff;
-  color: #222;
+  color: #213547;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
-.qna-list {
-  margin-top: 24px;
+
+.qna-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
-.qna-item {
-  border-bottom: 1px solid #eee;
-  padding: 16px 0;
+
+.qna-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
   color: #222;
 }
-.qna-item:last-child {
-  border-bottom: none;
+
+.qna-state {
+  padding: 28px 0;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
 }
+
+.qna-list {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.qna-item {
+  border: 1px solid #eee;
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 16px;
+  color: #222;
+}
+
+.qna-item__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.qna-item__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.qna-item__dot {
+  color: #bbb;
+}
+
+.qna-item__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.qna-item__body {
+  margin-top: 10px;
+}
+
+.qna-item__question {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+}
+
 .qna-answer {
-  margin-top: 8px;
-  color: #2a7b2a;
-  font-weight: 500;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #f6ffed;
+  color: #274e2d;
 }
-button {
-  margin:0;
-  padding: 6px 16px;
+
+.qna-answer__label {
+  font-weight: 700;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.qna-answer__content {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Scoped buttons (avoid affecting global app buttons) */
+.qna-btn {
+  margin: 0;
   border: none;
-  border-radius: 6px;
-  background: #1976d2;
-  color: #fff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
 }
-button:last-child {
-  background: #aaa;
+
+.qna-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
-.modal {
+
+.qna-btn--primary {
+  background-color: #4a6cf7;
+  color: #fff;
+}
+
+.qna-btn--danger {
+  background-color: #f5222d;
+  color: #fff;
+}
+
+.qna-btn--ghost {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* Modal */
+.qna-modal {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.2);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 16px;
 }
-.modal-content {
+
+.qna-modal__content {
+  width: 90%;
+  max-width: 520px;
   background: #fff;
   color: #222;
-  padding: 32px;
+  padding: 20px;
   border-radius: 12px;
-  min-width: 320px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
-textarea {
+
+.qna-modal__title {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.qna-modal__hint {
+  background: #f9fafb;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.qna-modal__hintLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.qna-modal__hintText {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.qna-textarea {
   width: 100%;
-  min-height: 60px;
-  margin: 12px 0;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  min-height: 110px;
+  margin: 0;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
   resize: vertical;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.qna-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .qna-wrapper {
+    margin: 16px auto;
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .qna-header {
+    align-items: stretch;
+  }
+
+  .qna-header .qna-btn {
+    width: 100%;
+  }
+
+  .qna-item__actions {
+    width: 100%;
+  }
+
+  .qna-item__actions .qna-btn {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .qna-title {
+    font-size: 20px;
+  }
+
+  .qna-item {
+    padding: 14px;
+  }
+
+  .qna-btn {
+    padding: 10px 12px;
+  }
 }

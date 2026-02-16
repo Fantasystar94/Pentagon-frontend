@@ -10,20 +10,15 @@ export default function Login() {
   const [error, setError] = useState("");
 
 const handleLogin = async () => {
-  console.log("email:", email);
-  console.log("password:", password);
-
   try {
     const res = await authApi.login({ email, password });
-    console.log("login response:", res);
 
     const accessToken = res.data?.data?.accessToken;
-    const username = res.data?.data?.username;
-    const userId = res.data?.data?.userId;
-    console.log("accessToken:", accessToken);
+    const username = res.data?.data?.username ?? res.data?.data?.userName;
+    const userId = res.data?.data?.userId ?? res.data?.data?.userID ?? res.data?.data?.id;
 
     if (!accessToken) {
-      console.error("❌ accessToken이 없음. 응답 구조 확인 필요");
+      setError("로그인에 실패했습니다. 잠시 후 다시 시도해주세요.");
       return;
     }
 
@@ -37,7 +32,6 @@ const handleLogin = async () => {
     localStorage.setItem("email", email);
     window.location.href = "/"; // 이 줄 하나만 남긴다
   } catch (e) {
-    console.error("login error:", e);
     setError("이메일 또는 비밀번호가 올바르지 않습니다.");
   }
 };
@@ -47,36 +41,44 @@ const handleLogin = async () => {
       <div className="login-box">
         <h2 className="login-title">로그인</h2>
 
-        <div className="input-group">
-          <label>이메일</label>
-          <input
-            type="email"
-            placeholder="example@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}
+        >
 
-        <div className="input-group">
-          <label>비밀번호</label>
-          <input
-            type="password"
-            placeholder="비밀번호"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+          <div className="input-group">
+            <label>이메일</label>
+            <input
+              type="email"
+              placeholder="example@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-        {error && <p className="error-text">{error}</p>}
+          <div className="input-group">
+            <label>비밀번호</label>
+            <input
+              type="password"
+              placeholder="비밀번호"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-        <button className="login-button" onClick={handleLogin}>
-          로그인
-        </button>
+          {error && <p className="error-text">{error}</p>}
 
-        <div className="login-footer">
-          <span>아직 계정이 없으신가요?</span>
-          <Link to="/signup">회원가입</Link>
-        </div>
+          <button className="login-button" type="submit">
+            로그인
+          </button>
+
+          <div className="login-footer">
+            <span>아직 계정이 없으신가요?</span>
+            <Link to="/signup">회원가입</Link>
+          </div>
+        </form>
       </div>
     </div>
   );

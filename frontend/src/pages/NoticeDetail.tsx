@@ -16,12 +16,9 @@ export default function NoticeDetail() {
     noticeApi
       .getNotice(parseInt(id, 10))
       .then((res) => {
-        console.log("공지사항 상세:", res.data?.data);
         setNotice(res.data?.data);
       })
-      .catch((err) => {
-        console.error("공지사항 조회 실패:", err);
-      })
+      .catch(() => {})
       .finally(() => {
         setLoading(false);
       });

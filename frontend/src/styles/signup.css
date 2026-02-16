@@ -1,22 +1,31 @@
+.signup-page,
+.signup-page * {
+  box-sizing: border-box;
+}
+
 .signup-page {
-  height: 100vh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: center;
   background: #f5f6fa;
+  padding: 24px 16px;
 }
 
 .signup-box {
-  width: 380px;
+  width: 100%;
+  max-width: 380px;
   padding: 32px;
   background: white;
   border-radius: 8px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  color: #111;
 }
 
 .signup-title {
   text-align: center;
   margin-bottom: 24px;
+  color: #111;
 }
 
 .input-group {
@@ -28,13 +37,14 @@
 .input-group label {
   font-size: 14px;
   margin-bottom: 4px;
-  color: #555;
+  color: #111;
 }
 
 .input-group input {
   padding: 10px;
   border-radius: 4px;
   border: 1px solid #ccc;
+  font-size: 16px;
 }
 
 .signup-button {
@@ -57,6 +67,7 @@
   margin-top: 16px;
   text-align: center;
   font-size: 14px;
+  color: #111;
 }
 
 .signup-footer a {
@@ -69,4 +80,15 @@
   color: red;
   font-size: 13px;
   margin-bottom: 8px;
+}
+
+@media (max-width: 480px) {
+  .signup-page {
+    align-items: flex-start;
+    padding-top: 32px;
+  }
+
+  .signup-box {
+    padding: 24px;
+  }
 }

@@ -1,0 +1,73 @@
+.home-cardGrid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 20px;
+  overflow-x: auto;
+  justify-content: space-around;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom:40px;
+}
+
+.home-cardGrid > * {
+  flex: 0 0 240px;
+}
+
+/* Home search box */
+.home-searchInput {
+  padding: 12px;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.home-searchBtn {
+  padding: 12px 20px;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  .home-cardGrid {
+    flex-direction: column;
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+
+  .home-cardGrid > * {
+    flex: 1 1 auto;
+  }
+
+  .home-searchInput {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .home-searchBtn {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-searchInput {
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+
+  .home-searchBtn {
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+
+  .searchBox {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.searchBox > input{
+  max-width:200px;
+  font-size:12px;
+}
+}

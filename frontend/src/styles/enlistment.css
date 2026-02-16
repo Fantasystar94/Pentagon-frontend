@@ -1,7 +1,13 @@
+.enlistment-page,
+.enlistment-page * {
+  box-sizing: border-box;
+}
+
 .enlistment-page {
   padding: 24px;
   background: #f5f6fa;
-  min-height: calc(100vh - 64px);
+  min-height: calc(100dvh - 64px);
+  margin: 0 auto;
 }
 
 .enlistment-layout {
@@ -115,6 +121,18 @@
   border-radius: 999px;
   padding: 4px 8px;
   width: fit-content;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge-label,
+.badge-num {
+  line-height: 1;
 }
 
 .legend {
@@ -239,5 +257,50 @@
 @media (max-width: 900px) {
   .enlistment-layout {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .enlistment-page {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .month-title {
+    font-size: 18px;
+  }
+
+  .weekdays {
+    gap: 4px;
+  }
+
+  .calendar-grid {
+    gap: 4px;
+  }
+
+  .day {
+    height: 62px;
+    padding: 6px;
+    border-radius: 8px;
+  }
+
+  .day-num {
+    font-size: 13px;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+
+  .badge-label {
+    display: none;
+  }
+
+  .selected-date {
+    font-size: 16px;
   }
 }

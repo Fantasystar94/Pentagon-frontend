@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/userAuth";
+import "../styles/header.css";
 
 export default function Header() {
   const { isLoggedIn, isAdmin, logout } = useAuth();
@@ -11,12 +12,12 @@ export default function Header() {
   };
 
   return (
-    <header style={styles.header}>
-      <div style={styles.logo}>
-        <Link to="/">병무청</Link>
+    <header className="app-header">
+      <div className="app-logo">
+        <Link to="/"><div className="logo"><img src="../src/assets/logo.png" alt="병무청 로고" /></div>병무청</Link>
       </div>
 
-      <nav style={styles.nav}>
+      <nav className="app-nav">
         <Link to="/products">상품</Link>
         <Link to="/enlistment">입영 일정</Link>
         <Link to="/deferments">연기 신청</Link>
@@ -29,9 +30,9 @@ export default function Header() {
 
       <div>
         {isLoggedIn ? (
-          <div style={styles.authBox}>
+          <div className="app-auth">
             <Link to="/mypage">마이페이지</Link>
-            <button onClick={handleLogout} style={styles.logoutBtn}>
+            <button onClick={handleLogout} className="app-logoutBtn">
               로그아웃
             </button>
           </div>
@@ -42,34 +43,3 @@ export default function Header() {
     </header>
   );
 }
-
-const styles = {
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "16px 24px",
-    borderBottom: "1px solid #ddd",
-  },
-  logo: {
-    fontWeight: "bold",
-    fontSize: "18px",
-  },
-  nav: {
-    display: "flex",
-    gap: "16px",
-  },
-  authBox: {
-    display: "flex",
-    gap: "12px",
-    alignItems: "center",
-  },
-  logoutBtn: {
-    padding:0,
-    margin:0,
-    border: "none",
-    background: "transparent",
-    cursor: "pointer",
-    color: "#4a6cf7",
-  },
-};

@@ -1,7 +1,15 @@
+.orders-page,
+.orders-page * {
+  box-sizing: border-box;
+}
+
 .orders-page {
-  padding: 24px;
+  padding: clamp(16px, 4vw, 24px);
   max-width: 900px;
   margin: 0 auto;
+  background: #f5f6fa;
+  min-height: calc(100dvh - 64px);
+  color: #213547;
 }
 
 .orders-title {
@@ -21,6 +29,7 @@
   border-radius: 8px;
   padding: 16px;
   background: #fff;
+  color: #111;
 }
 
 .orders-row {
@@ -31,10 +40,23 @@
   color: #222;
 }
 
+.orders-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .orders-muted {
   color: #666;
 }
 
 .orders-error {
   color: #c33;
+}
+
+@media (max-width: 480px) {
+  .orders-list {
+    grid-template-columns: 1fr;
+  }
 }

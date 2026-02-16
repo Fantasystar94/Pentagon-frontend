@@ -18,7 +18,7 @@ const DEFERMENT_LABELS: { [key: string]: string } = {
 
 export default function Deferments() {
   const navigate = useNavigate();
-  const { isLoggedIn, userId, isAdmin, isInitialized } = useAuth();
+  const { isLoggedIn, userId, username, isAdmin, isInitialized } = useAuth();
   const [deferments, setDeferments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -64,54 +64,28 @@ export default function Deferments() {
 
     setLoading(true);
     try {
-      const appRes = await enlistmentApi.getApplicationList();
-      const appData = appRes.data?.data;
-      const appList = Array.isArray(appData) ? appData : appData?.content || [];
+      const res = await enlistmentApi.getDeferments({ page: 0, size: 50 });
+      const data = res.data?.data;
+      const list = Array.isArray(data) ? data : data?.content || [];
 
-      const myApps = appList.filter((app: any) => {
-        const appUserId = app.userId ?? app.user_id ?? app.memberId ?? app.accountId;
-        return appUserId === userId;
-      });
-
-      const toNumber = (value: any) => {
-        if (typeof value === "number" && Number.isFinite(value)) return value;
-        const parsed = parseInt(String(value ?? ""), 10);
-        return Number.isFinite(parsed) ? parsed : null;
+      // 백엔드가 '전체 조회'를 내려주는 경우를 대비해 프론트에서 한번 더 필터링
+      // - userId 필드가 있는 경우에만 userId로 필터
+      // - userId 필드가 없다면(현재 응답 예시처럼 username만 있는 경우), 백엔드가 내 것만 내려준다고 가정하고 그대로 표시
+      const safeNumber = (v: any) => {
+        const n = typeof v === "number" ? v : parseInt(String(v ?? ""), 10);
+        return Number.isFinite(n) ? n : null;
       };
+      const hasUserIdField = list.some((d: any) => d?.userId != null || d?.user_id != null);
 
-      const candidateIds: Array<number | null> = myApps.map((app: any) =>
-        toNumber(
-          app.defermentsId ??
-            app.defermentId ??
-            app.deferment_id ??
-            app.deferId
-        )
-      );
+      const myList = hasUserIdField
+        ? list.filter((d: any) => {
+            const id = safeNumber(d?.userId ?? d?.user_id);
+            return id != null && id === userId;
+          })
+        : list;
 
-      const defermentIds: number[] = Array.from(
-        new Set(candidateIds.filter((id): id is number => typeof id === "number"))
-      );
-
-      if (defermentIds.length === 0) {
-        setDeferments([]);
-        return;
-      }
-
-      const results = await Promise.all(
-        defermentIds.map((defermentsId) =>
-          enlistmentApi
-            .getDeferment(defermentsId)
-            .then((res) => res.data?.data)
-            .catch((err) => {
-              console.error("연기 신청 상세 조회 실패:", err);
-              return null;
-            })
-        )
-      );
-
-      setDeferments(results.filter(Boolean));
+      setDeferments(myList);
     } catch (err) {
-      console.error("연기 신청 조회 실패:", err);
       setDeferments([]);
     } finally {
       setLoading(false);
@@ -124,12 +98,10 @@ export default function Deferments() {
     enlistmentApi
       .getDefermentList({ page: 0, size: 50 })
       .then((res) => {
-        console.log("어드민 연기 신청 목록:", res.data?.data);
         const data = res.data?.data;
         setAdminDeferments(Array.isArray(data) ? data : data?.content || []);
       })
-      .catch((err) => {
-        console.error("연기 신청 목록 조회 실패:", err);
+      .catch(() => {
         setAdminDeferments([]);
       })
       .finally(() => {
@@ -156,8 +128,7 @@ export default function Deferments() {
         defermentStatus: applyData.defermentStatus as any,
         reasonDetail: applyData.reasonDetail,
       })
-      .then((res) => {
-        console.log("연기 신청 성공:", res.data);
+      .then(() => {
         setMessage({ type: "success", text: "연기 신청이 완료되었습니다." });
         setShowApplyModal(false);
         setApplyData({ applicationId: "", defermentStatus: "ILLNESS", reasonDetail: "" });
@@ -167,7 +138,6 @@ export default function Deferments() {
         }, 1000);
       })
       .catch((err) => {
-        console.error("연기 신청 실패:", err);
         setMessage({
           type: "error",
           text: err.response?.data?.message || "연기 신청에 실패했습니다.",
@@ -183,8 +153,7 @@ export default function Deferments() {
     setProcessingLoading(true);
     enlistmentApi
       .processDeferment(defermentsId, { decisionStatus: decision as any })
-      .then((res) => {
-        console.log("연기 처리 완료:", res.data);
+      .then(() => {
         setMessage({
           type: "success",
           text: `연기 신청이 ${decision === "APPROVED" ? "승인" : "반려"}되었습니다.`,
@@ -192,7 +161,6 @@ export default function Deferments() {
         fetchAdminDeferments();
       })
       .catch((err) => {
-        console.error("연기 처리 실패:", err);
         setMessage({
           type: "error",
           text: err.response?.data?.message || "처리에 실패했습니다.",
@@ -227,15 +195,18 @@ export default function Deferments() {
 
                 {adminDeferments.map((deferment: any, index: number) => (
                   <div key={index} style={styles.tableRow}>
-                    <div style={styles.tableCol1}>{deferment.userId}</div>
+                    <div style={styles.tableCol1}>{deferment.username ?? deferment.userId}</div>
                     <div style={styles.tableCol2}>
-                      {DEFERMENT_LABELS[deferment.defermentStatus] || deferment.defermentStatus}
+                      {DEFERMENT_LABELS[deferment.status ?? deferment.defermentStatus] ||
+                        deferment.status ||
+                        deferment.defermentStatus}
                     </div>
                     <div style={styles.tableCol3}>
-                      {deferment.reasonDetail?.substring(0, 30)}
-                      {deferment.reasonDetail?.length > 30 ? "..." : ""}
+                      {(deferment.reason ?? deferment.reasonDetail)?.substring?.(0, 30)}
+                      {(deferment.reason ?? deferment.reasonDetail)?.length > 30 ? "..." : ""}
                     </div>
                     <div style={styles.tableCol4}>
+                      {/** statusBadge는 decisionStatus 기반(없으면 대기) */}
                       <span
                         style={{
                           ...styles.statusBadge,
@@ -256,7 +227,10 @@ export default function Deferments() {
                         <div style={styles.actionButtons}>
                           <button
                             onClick={() =>
-                              handleProcessDeferment(deferment.id, "APPROVED")
+                              handleProcessDeferment(
+                                deferment.defermentsId ?? deferment.id,
+                                "APPROVED"
+                              )
                             }
                             style={styles.approveBtn}
                             disabled={processingLoading}
@@ -265,7 +239,10 @@ export default function Deferments() {
                           </button>
                           <button
                             onClick={() =>
-                              handleProcessDeferment(deferment.id, "REJECTED")
+                              handleProcessDeferment(
+                                deferment.defermentsId ?? deferment.id,
+                                "REJECTED"
+                              )
                             }
                             style={styles.rejectBtn}
                             disabled={processingLoading}
@@ -296,7 +273,8 @@ export default function Deferments() {
                   <div key={index} style={styles.card}>
                     <div style={styles.cardHeader}>
                       <h3 style={styles.cardTitle}>
-                        {DEFERMENT_LABELS[deferment.defermentStatus] ||
+                        {DEFERMENT_LABELS[deferment.status ?? deferment.defermentStatus] ||
+                          deferment.status ||
                           deferment.defermentStatus}
                       </h3>
                       <span
@@ -317,18 +295,31 @@ export default function Deferments() {
 
                     <div style={styles.cardContent}>
                       <p>
-                        <strong>신청 사유:</strong> {deferment.reasonDetail}
+                        <strong>유저:</strong> {deferment.username ?? username ?? "-"}
+                      </p>
+                      <p>
+                        <strong>신청 사유:</strong> {deferment.reason ?? deferment.reasonDetail}
                       </p>
                       <p>
                         <strong>신청 날짜:</strong>{" "}
-                        {new Date(deferment.createdAt).toLocaleDateString("ko-KR")}
+                        {deferment.createdAt
+                          ? new Date(deferment.createdAt).toLocaleDateString("ko-KR")
+                          : "-"}
+                      </p>
+                      <p>
+                        <strong>변경 요청일:</strong>{" "}
+                        {deferment.changedDate
+                          ? new Date(deferment.changedDate).toLocaleDateString("ko-KR")
+                          : "-"}
                       </p>
                       {deferment.decisionStatus && (
                         <p>
                           <strong>처리 날짜:</strong>{" "}
-                          {new Date(deferment.updatedAt).toLocaleDateString(
-                            "ko-KR"
-                          )}
+                          {deferment.modifiedAt
+                            ? new Date(deferment.modifiedAt).toLocaleDateString("ko-KR")
+                            : deferment.updatedAt
+                              ? new Date(deferment.updatedAt).toLocaleDateString("ko-KR")
+                              : "-"}
                         </p>
                       )}
                     </div>
@@ -526,7 +517,7 @@ const styles = {
   } as const,
 
   approveBtn: {
-    backgroundColor: "#52c41a",
+    backgroundColor: "#4a6cf7",
     color: "white",
     border: "none",
     padding: "6px 12px",

@@ -23,9 +23,8 @@ export default function Products() {
       try {
         const res = await productApi.getProducts();
         setProducts(res.data.data.content ?? res.data.data);
-        console.log("상품 조회 성공:", res);
       } catch (e) {
-        console.error("상품 조회 실패", e);
+        // ignore
       } finally {
         setLoading(false);
       }

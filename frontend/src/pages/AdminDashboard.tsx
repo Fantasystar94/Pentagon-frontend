@@ -62,12 +62,8 @@ const AdminDashboard: React.FC = () => {
     try {
       const enlistRes = await enlistmentApi.getApplicationList();
       const deferRes = await enlistmentApi.getDefermentList();
-      console.log("입영신청 리스트:", enlistRes.data);
-      console.log("연기신청 리스트:", deferRes.data);
       setEnlistments(enlistRes.data.data || []);
       setDeferments(deferRes.data.data.content || []);
-      console.log("입영신청 데이터:", enlistRes.data.data);
-      console.log("연기신청 데이터:", deferRes.data.data.content);
     } catch (e) {
       // 에러 처리
     }
@@ -194,66 +190,72 @@ const AdminDashboard: React.FC = () => {
           <div className="dashboard-block">
             <h4 className="block-title">전체 요약</h4>
             {dashboardSummary ? (
-              <table className="dashboard-table">
-                <tbody>
-                  <tr>
-                    <th>총 유저 수</th>
-                    <td>{dashboardSummary.totalUsers}</td>
-                  </tr>
-                  <tr>
-                    <th>입영 확정</th>
-                    <td>{dashboardSummary.confirmedEnlistments}</td>
-                  </tr>
-                  <tr>
-                    <th>입영 신청</th>
-                    <td>{dashboardSummary.requestedEnlistments}</td>
-                  </tr>
-                  <tr>
-                    <th>잔여 입영 슬롯</th>
-                    <td>{dashboardSummary.totalRemainingSlots}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="table-scroll">
+                <table className="dashboard-table">
+                  <tbody>
+                    <tr>
+                      <th>총 유저 수</th>
+                      <td>{dashboardSummary.totalUsers}</td>
+                    </tr>
+                    <tr>
+                      <th>입영 확정</th>
+                      <td>{dashboardSummary.confirmedEnlistments}</td>
+                    </tr>
+                    <tr>
+                      <th>입영 신청</th>
+                      <td>{dashboardSummary.requestedEnlistments}</td>
+                    </tr>
+                    <tr>
+                      <th>잔여 입영 슬롯</th>
+                      <td>{dashboardSummary.totalRemainingSlots}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             ) : '로딩 중...'}
           </div>
           <div className="dashboard-block">
             <h4 className="block-title">요청 대기</h4>
             {dashboardRequested ? (
-              <table className="dashboard-table">
-                <tbody>
-                  <tr>
-                    <th>입영 신청</th>
-                    <td>{dashboardRequested.requestedEnlistments}</td>
-                  </tr>
-                  <tr>
-                    <th>입영 확정</th>
-                    <td>{dashboardRequested.confirmedEnlistments}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="table-scroll">
+                <table className="dashboard-table">
+                  <tbody>
+                    <tr>
+                      <th>입영 신청</th>
+                      <td>{dashboardRequested.requestedEnlistments}</td>
+                    </tr>
+                    <tr>
+                      <th>입영 확정</th>
+                      <td>{dashboardRequested.confirmedEnlistments}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             ) : '로딩 중...'}
           </div>
           <div className="dashboard-block">
             <h4 className="block-title">연기 요약</h4>
             {dashboardDeferments && Array.isArray(dashboardDeferments) && dashboardDeferments.length > 0 ? (
-              <table className="dashboard-table">
-                <thead>
-                  <tr>
-                    {Object.keys(dashboardDeferments[0]).map(key => (
-                      <th key={key}>{key}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {dashboardDeferments.map((row: any, idx: number) => (
-                    <tr key={idx}>
-                      {Object.values(row).map((val, i) => (
-                        <td key={i}>{typeof val === 'object' ? JSON.stringify(val) : String(val ?? '')}</td>
+              <div className="table-scroll">
+                <table className="dashboard-table">
+                  <thead>
+                    <tr>
+                      {Object.keys(dashboardDeferments[0]).map(key => (
+                        <th key={key}>{key}</th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {dashboardDeferments.map((row: any, idx: number) => (
+                      <tr key={idx}>
+                        {Object.values(row).map((val, i) => (
+                          <td key={i}>{typeof val === 'object' ? JSON.stringify(val) : String(val ?? '')}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ) : '데이터 없음'}
           </div>
         </div>
@@ -292,92 +294,98 @@ const AdminDashboard: React.FC = () => {
             </div>
           </form>
           {noticeLoading ? <div>로딩 중...</div> : (
-            <table className="dashboard-table notice-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>제목</th>
-                  <th>내용</th>
-                  <th>관리</th>
-                </tr>
-              </thead>
-              <tbody>
-                {notices.map(notice => (
-                  <tr key={notice.id}>
-                    <td>{notice.id}</td>
-                    <td>{notice.title}</td>
-                    <td>{notice.content}</td>
-                    <td>
-                      <button onClick={() => handleEditNotice(notice)}>수정</button>
-                      <button onClick={() => handleDeleteNotice(notice.id)} style={{marginLeft: 4}}>삭제</button>
-                    </td>
+            <div className="table-scroll">
+              <table className="dashboard-table notice-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>제목</th>
+                    <th>내용</th>
+                    <th>관리</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {notices.map(notice => (
+                    <tr key={notice.id}>
+                      <td>{notice.id}</td>
+                      <td>{notice.title}</td>
+                      <td>{notice.content}</td>
+                      <td>
+                        <button onClick={() => handleEditNotice(notice)}>수정</button>
+                        <button onClick={() => handleDeleteNotice(notice.id)} style={{marginLeft: 4}}>삭제</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
           <h3>입영 신청 리스트</h3>
           {loading ? <div>로딩 중...</div> : (
-            <table className="dashboard-table">
-              <thead>
-                <tr>
-                  <th>입영일</th>
-                  <th>유저ID</th>
-                  <th>상태</th>
-                  <th>신청일</th>
-                  <th>처리</th>
-                </tr>
-              </thead>
-              <tbody>
-                {enlistments.map(app => (
-                  <tr key={app.applicationId}>
-                    <td>{app.enlistmentDate}</td>
-                    <td>{app.userName}</td>
-                    <td>{app.status}</td>
-                    <td>{app.createdAt}</td>
-                    <td>
-                      {app.status !== 'APPROVED' && (
-                        <button key={`approve-${app.applicationId}`} onClick={() => handleApproveEnlist(app.applicationId)}>확인 처리</button>
-                      )}
-                    </td>
+            <div className="table-scroll">
+              <table className="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>입영일</th>
+                    <th>유저ID</th>
+                    <th>상태</th>
+                    <th>신청일</th>
+                    <th>처리</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {enlistments.map(app => (
+                    <tr key={app.applicationId}>
+                      <td>{app.enlistmentDate}</td>
+                      <td>{app.userName}</td>
+                      <td>{app.status}</td>
+                      <td>{app.createdAt}</td>
+                      <td>
+                        {app.status !== 'APPROVED' && (
+                          <button key={`approve-${app.applicationId}`} onClick={() => handleApproveEnlist(app.applicationId)}>확인 처리</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
           <h3>연기 신청 리스트</h3>
           {loading ? <div>로딩 중...</div> : (
-            <table className="dashboard-table">
-              <thead>
-                <tr>
-                  <th>연기ID</th>
-                  <th>유저ID</th>
-                  <th>상태</th>
-                  <th>신청일</th>
-                  <th>변경요청일</th>
-                  <th>처리</th>
-                </tr>
-              </thead>
-              <tbody>
-                {deferments.map(app => (
-                  <tr key={app.defermentsId}>
-                    <td>{app.defermentsId}</td>
-                    <td>{app.username}</td>
-                    <td>{app.reason}</td>
-                    <td>{app.createdAt}</td>
-                    <td>{app.changedDate}</td>
-                    <td>
-                      {app.decisionStatus !== 'APPROVED' && (
-                        <>
-                          <button onClick={() => handleApproveDefer(app.defermentsId)}>승인</button>
-                          <button onClick={() => handleRejectDefer(app.defermentsId)} style={{marginLeft:4}}>반려</button>
-                        </>
-                      )}
-                    </td>
+            <div className="table-scroll">
+              <table className="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>연기ID</th>
+                    <th>유저ID</th>
+                    <th>상태</th>
+                    <th>신청일</th>
+                    <th>변경요청일</th>
+                    <th>처리</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {deferments.map(app => (
+                    <tr key={app.defermentsId}>
+                      <td>{app.defermentsId}</td>
+                      <td>{app.username}</td>
+                      <td>{app.reason}</td>
+                      <td>{app.createdAt}</td>
+                      <td>{app.changedDate}</td>
+                      <td>
+                        {app.decisionStatus !== 'APPROVED' && (
+                          <>
+                            <button onClick={() => handleApproveDefer(app.defermentsId)}>승인</button>
+                            <button onClick={() => handleRejectDefer(app.defermentsId)} style={{marginLeft:4}}>반려</button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
           <div className="section-header" style={{ marginTop: 32 }}>
             <h3 className="section-title">상품 등록</h3>

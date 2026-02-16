@@ -1,8 +1,15 @@
+.order-create-page,
+.order-create-page * {
+  box-sizing: border-box;
+}
+
 .order-create-page {
-  padding: 24px;
+  padding: clamp(16px, 4vw, 24px);
   max-width: 900px;
   margin: 0 auto;
   color: #111;
+  background: #f5f6fa;
+  min-height: calc(100dvh - 64px);
 }
 
 .order-create-title {
@@ -129,5 +136,15 @@
 
   .order-create-actions .order-create-btn {
     flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .order-create-card {
+    padding: 14px;
+  }
+
+  .order-create-thumb {
+    height: 180px;
   }
 }

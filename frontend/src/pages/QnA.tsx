@@ -1,8 +1,8 @@
-import Header from '../components/Header';
-import React, { useEffect, useState } from 'react';
-import { qnaApi } from '../api/qnaApi';
-import '../styles/qna.css';
-import { useAuth } from '../hooks/userAuth';
+import Header from "../components/Header";
+import React, { useEffect, useMemo, useState } from "react";
+import { qnaApi } from "../api/qnaApi";
+import "../styles/qna.css";
+import { useAuth } from "../hooks/userAuth";
 
 interface Qna {
   id: number;
@@ -21,9 +21,19 @@ const QnA: React.FC = () => {
   const [qnaList, setQnaList] = useState<Qna[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [newQuestion, setNewQuestion] = useState('');
+  const [newQuestion, setNewQuestion] = useState("");
   const [selectedQna, setSelectedQna] = useState<Qna | null>(null);
-  const [answerText, setAnswerText] = useState('');
+  const [answerText, setAnswerText] = useState("");
+
+  const formatDate = useMemo(
+    () => (value?: string) => {
+      if (!value) return "-";
+      const t = Date.parse(value);
+      if (Number.isNaN(t)) return value;
+      return new Date(t).toLocaleDateString("ko-KR");
+    },
+    []
+  );
 
   useEffect(() => {
     if (!isInitialized) return;
@@ -34,10 +44,9 @@ const QnA: React.FC = () => {
     setLoading(true);
     try {
       const res = await qnaApi.getQnaList();
-      console.log('QnA GET 응답:', res);
       setQnaList(res.data.data.content || []);
     } catch (e) {
-      console.error('QnA GET 에러:', e);
+      // ignore
     }
     setLoading(false);
   };
@@ -45,9 +54,9 @@ const QnA: React.FC = () => {
   const handleRegister = async () => {
     if (!newQuestion.trim() || !userId) return;
     try {
-      await qnaApi.registerQna(userId, { title: '질문', questionContent: newQuestion });
+      await qnaApi.registerQna(userId, { title: "질문", questionContent: newQuestion });
       setShowModal(false);
-      setNewQuestion('');
+      setNewQuestion("");
       fetchQnaList();
     } catch (e) {}
   };
@@ -57,7 +66,7 @@ const QnA: React.FC = () => {
     try {
       await qnaApi.answerQna(selectedQna.id, { askContent: answerText });
       setSelectedQna(null);
-      setAnswerText('');
+      setAnswerText("");
       fetchQnaList();
     } catch (e) {}
   };
@@ -72,63 +81,133 @@ const QnA: React.FC = () => {
   return (
     <>
       <Header />
-      <div className="qna-page">
+      <main className="qna-page">
         <div className="qna-wrapper">
-        <h2>QnA 게시판</h2>
-        {isLoggedIn && (
-          <button onClick={() => setShowModal(true)}>질문 등록</button>
-        )}
-        {loading ? (
-          <div>로딩 중...</div>
-        ) : (
-          <div className="qna-list">
-            {qnaList.map(qna => (
-              <div key={qna.id} className="qna-item">
-                <div>
-                  <strong>작성자: {qna.userId}</strong> ({qna.createdAt})
-                  <p>{qna.questionContent}</p>
-                  {qna.askContent ? (
-                    <div className="qna-answer">
-                      <strong>답변:</strong> <span>{qna.askContent}</span>
+          <div className="qna-header">
+            <h2 className="qna-title">QnA 게시판</h2>
+
+            {isLoggedIn && (
+              <button
+                className="qna-btn qna-btn--primary"
+                onClick={() => setShowModal(true)}
+              >
+                질문 등록
+              </button>
+            )}
+          </div>
+
+          {loading ? (
+            <div className="qna-state">로딩 중...</div>
+          ) : qnaList.length > 0 ? (
+            <div className="qna-list">
+              {qnaList.map((qna) => (
+                <div key={qna.id} className="qna-item">
+                  <div className="qna-item__top">
+                    <div className="qna-item__meta">
+                      <span className="qna-item__author">작성자 {qna.userId}</span>
+                      <span className="qna-item__dot">·</span>
+                      <span className="qna-item__date">{formatDate(qna.createdAt)}</span>
                     </div>
-                  ) : (
-                    isAdmin && (
-                      <button onClick={() => setSelectedQna(qna)}>답변하기</button>
-                    )
-                  )}
-                  {isAdmin && (
-                    <button onClick={() => handleDelete(qna.id)}>삭제</button>
-                  )}
+
+                    {isAdmin && (
+                      <div className="qna-item__actions">
+                        {!qna.askContent && (
+                          <button
+                            className="qna-btn qna-btn--primary"
+                            onClick={() => {
+                              setSelectedQna(qna);
+                              setAnswerText("");
+                            }}
+                          >
+                            답변하기
+                          </button>
+                        )}
+                        <button
+                          className="qna-btn qna-btn--danger"
+                          onClick={() => handleDelete(qna.id)}
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="qna-item__body">
+                    <p className="qna-item__question">{qna.questionContent}</p>
+
+                    {qna.askContent && (
+                      <div className="qna-answer">
+                        <div className="qna-answer__label">답변</div>
+                        <div className="qna-answer__content">{qna.askContent}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="qna-state">등록된 질문이 없습니다.</div>
+          )}
+
+          {/* 질문 등록 모달 */}
+          {showModal && (
+            <div className="qna-modal" onClick={() => setShowModal(false)}>
+              <div className="qna-modal__content" onClick={(e) => e.stopPropagation()}>
+                <h3 className="qna-modal__title">질문 등록</h3>
+                <textarea
+                  className="qna-textarea"
+                  value={newQuestion}
+                  onChange={(e) => setNewQuestion(e.target.value)}
+                  placeholder="질문 내용을 입력해주세요"
+                />
+                <div className="qna-modal__actions">
+                  <button className="qna-btn qna-btn--ghost" onClick={() => setShowModal(false)}>
+                    취소
+                  </button>
+                  <button
+                    className="qna-btn qna-btn--primary"
+                    onClick={handleRegister}
+                    disabled={!newQuestion.trim()}
+                  >
+                    등록
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-        {/* 질문 등록 모달 */}
-        {showModal && (
-          <div className="modal">
-            <div className="modal-content">
-              <h3>질문 등록</h3>
-              <textarea value={newQuestion} onChange={e => setNewQuestion(e.target.value)} />
-              <button onClick={handleRegister}>등록</button>
-              <button onClick={() => setShowModal(false)}>취소</button>
             </div>
-          </div>
-        )}
-        {/* 답변 모달 (관리자만) */}
-        {selectedQna && isAdmin && (
-          <div className="modal">
-            <div className="modal-content">
-              <h3>답변 작성</h3>
-              <p>질문: {selectedQna.askContent}</p>
-              <textarea value={answerText} onChange={e => setAnswerText(e.target.value)} />
-              <button onClick={handleAnswer}>답변 등록</button>
-              <button onClick={() => setSelectedQna(null)}>취소</button>
+          )}
+
+          {/* 답변 모달 (관리자만) */}
+          {selectedQna && isAdmin && (
+            <div className="qna-modal" onClick={() => setSelectedQna(null)}>
+              <div className="qna-modal__content" onClick={(e) => e.stopPropagation()}>
+                <h3 className="qna-modal__title">답변 작성</h3>
+                <div className="qna-modal__hint">
+                  <div className="qna-modal__hintLabel">질문</div>
+                  <div className="qna-modal__hintText">{selectedQna.questionContent}</div>
+                </div>
+                <textarea
+                  className="qna-textarea"
+                  value={answerText}
+                  onChange={(e) => setAnswerText(e.target.value)}
+                  placeholder="답변 내용을 입력해주세요"
+                />
+                <div className="qna-modal__actions">
+                  <button className="qna-btn qna-btn--ghost" onClick={() => setSelectedQna(null)}>
+                    취소
+                  </button>
+                  <button
+                    className="qna-btn qna-btn--primary"
+                    onClick={handleAnswer}
+                    disabled={!answerText.trim()}
+                  >
+                    답변 등록
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </div>
-      </div>
+      </main>
     </>
   );
 };

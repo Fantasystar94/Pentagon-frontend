@@ -69,9 +69,13 @@ export default function ProductDetail() {
 
         <QuantitySelector value={qty} onChange={setQty} />
 
-        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-          <button onClick={handleAddToCart}>장바구니 담기</button>
-          <button onClick={handleBuy}>구매하기</button>
+        <div className="product-actions">
+          <button className="product-action secondary" onClick={handleAddToCart}>
+            장바구니 담기
+          </button>
+          <button className="product-action primary" onClick={handleBuy}>
+            구매하기
+          </button>
         </div>
       </main>
     </>

@@ -15,6 +15,14 @@ export interface EnlistmentQuery {
   pageable?: any;
 }
 
+export interface ApplicationQuery {
+  page?: number;
+  size?: number;
+  sort?: string;
+  direction?: string;
+  userId?: number;
+}
+
 export interface DefermentsPostRequest {
   applicationId?: number;
   defermentStatus?:
@@ -38,6 +46,13 @@ export interface DefermentPatchRequest {
     | "SIMPLECHANGE"
     | "APPROVED"
     | "REJECTED";
+}
+
+export interface DefermentQuery {
+  page?: number;
+  size?: number;
+  sort?: string;
+  direction?: string;
 }
 
 /* =====================
@@ -75,8 +90,8 @@ export const enlistmentApi = {
      Enlistment Application
   ===================== */
   // 입영 신청 목록 조회
-  getApplicationList: () =>
-    api.get("/enlistment-applications"),
+  getApplicationList: (params?: ApplicationQuery) =>
+    api.get("/enlistment-applications", { params }),
 
   // 입영 신청 상세 조회
   getApplication: (applicationId: number) =>
@@ -100,6 +115,10 @@ export const enlistmentApi = {
   // 연기 신청 상세 조회
   getDeferment: (defermentsId: number) =>
     api.get(`/deferments/${defermentsId}`),
+
+  // (유저) 연기 신청 목록 조회
+  // 백엔드: @GetMapping("") getDefermentList(Pageable pageable)
+  getDeferments: (params?: DefermentQuery) => api.get("/deferments", { params }),
 
   /* =====================
      Admin API

@@ -3,14 +3,26 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "../components/Header";
 import { paymentsApi } from "../api/paymentsApi";
 import { clearPendingPayment, getPendingPayment } from "../store/pendingPayment";
+import "../styles/payment.css";
 
 function getErrorMessage(error: unknown) {
   const anyErr = error as any;
   return (
     anyErr?.response?.data?.message ||
     anyErr?.response?.data?.error ||
+    anyErr?.response?.data?.code ||
     anyErr?.message ||
     "요청 처리 중 오류가 발생했습니다."
+  );
+}
+
+function shouldTryDoneLookup(message: string) {
+  const m = message.toLowerCase();
+  return (
+    m.includes("already") ||
+    m.includes("processed") ||
+    m.includes("이미") ||
+    m.includes("중복")
   );
 }
 
@@ -28,14 +40,9 @@ export default function PaymentSuccess() {
     if (calledRef.current) return;
     calledRef.current = true;
 
-    console.log("결제 성공 파라미터", {
-      paymentKey,
-      orderId,
-      amount,
-    });
+    const amountNumber = amount ? Number(amount) : NaN;
 
-    // ❌ 파라미터 누락
-    if (!paymentKey || !orderId || !amount) {
+    if (!paymentKey || !orderId || !amount || !Number.isFinite(amountNumber)) {
       alert("결제 정보가 올바르지 않습니다.");
       navigate("/");
       return;
@@ -43,70 +50,61 @@ export default function PaymentSuccess() {
 
     const confirmPayment = async () => {
       try {
-        if (!orderId || !paymentKey) {
-          alert("결제 정보가 올바르지 않습니다.");
-          navigate("/products");
-          return;
-        }
-
-        // Toss success의 orderId는 우리가 Toss에 보낸 값(orderNumber) 그대로 들어옴
-        // 백엔드 createPayment는 주문 PK(Long)가 필요하므로, redirect 전에 저장해둔 매핑을 사용
-        let orderPk: number | null = null;
-
         const pending = getPendingPayment(orderId);
-        if (pending) {
-          orderPk = pending.orderPk;
-        } else if (orderId.startsWith("order_")) {
-          // 레거시 fallback: order_123 형태면 PK로 간주
-          const numericOrderId = parseInt(orderId.replace("order_", ""), 10);
-          if (!Number.isNaN(numericOrderId)) {
-            orderPk = numericOrderId;
-          }
-        }
+        const orderPk = pending?.orderPk ?? null;
 
         if (!orderPk) {
-          console.error("pendingPayment 매핑 없음. orderId=", orderId);
           alert("주문 정보를 찾지 못했습니다. 주문 페이지에서 다시 시도해주세요.");
           navigate("/orders");
           return;
         }
 
-        // 1️⃣ paymentKey를 DB에 저장
+        // 1) createPayment: 결제 레코드 생성 + paymentKey 저장
+        // 새로고침/중복진입 시 "이미 결제한 주문" 등으로 실패할 수 있어도 confirm을 시도
+        let createError: unknown = null;
         try {
-          const createRes = await paymentsApi.createPayment({
-            orderId: orderPk,
-            paymentKey,
-          });
-
-          console.log("createPayment success:", createRes.data);
+          await paymentsApi.createPayment({ orderId: orderPk, paymentKey });
         } catch (e) {
-          console.error("createPayment failed:", e);
-          alert(getErrorMessage(e));
+          createError = e;
+        }
+
+        // 2) confirmPayment: 토스 승인 + 재고 차감 + 주문 완료
+        let res;
+        try {
+          res = await paymentsApi.confirmPayment({ paymentKey });
+        } catch (e) {
+          const confirmMsg = getErrorMessage(e);
+
+          // 이미 처리된 결제/중복 승인 등으로 실패한 케이스에만 DONE 조회를 시도
+          if (shouldTryDoneLookup(confirmMsg)) {
+            try {
+              const getRes = await paymentsApi.getPaymentByPaymentKey(paymentKey);
+              const data = getRes.data?.data;
+              const status = String((data as any)?.status ?? "").toUpperCase();
+              if (status === "DONE") {
+                clearPendingPayment(orderId);
+                navigate("/orders/complete", { state: { payment: data } });
+                return;
+              }
+            } catch {
+              // ignore
+            }
+          }
+
+          const createMsg = createError ? getErrorMessage(createError) : "";
+          const message = createMsg && createMsg !== confirmMsg ? `${confirmMsg}\n(${createMsg})` : confirmMsg;
+          alert(message);
           navigate("/products");
           return;
         }
 
-        // 2️⃣ 결제 승인
-        const res = await paymentsApi.confirmPayment({
-          paymentKey,
-        });
-
-        console.log("결제 승인 성공:", res.data);
         clearPendingPayment(orderId);
-
-        // 3️⃣ 주문 완료 페이지 이동
-        navigate("/orders/complete", {
-          state: {
-            payment: res.data.data,
-          },
-        });
+        navigate("/orders/complete", { state: { payment: res.data?.data } });
       } catch (error) {
-        console.error("결제 승인 실패:", error);
         alert(getErrorMessage(error));
         navigate("/products");
       }
     };
-
 
     confirmPayment();
   }, [params, navigate]);
@@ -114,9 +112,11 @@ export default function PaymentSuccess() {
   return (
     <>
       <Header />
-      <main style={{ padding: "40px", textAlign: "center" }}>
-        <h2>결제 승인 처리 중입니다...</h2>
-        <p>잠시만 기다려주세요.</p>
+      <main className="payment-page">
+        <section className="payment-card">
+          <h2>결제 승인 처리 중입니다...</h2>
+          <p>잠시만 기다려주세요.</p>
+        </section>
       </main>
     </>
   );

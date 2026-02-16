@@ -54,46 +54,24 @@ export default function Enlistment() {
     try {
       setLoading(true);
       const res = await enlistmentApi.getEnlistmentList(0, 100);
-
-      console.log("=== 입영 일정 조회 ===");
-      console.log("전체 응답:", res);
-      console.log("res.data:", res.data);
-      console.log("res.data.data:", res.data?.data);
-      console.log("res.data.content:", res.data?.content);
       
       // 응답 데이터 구조 확인 후 처리
       let data = res.data?.data || res.data?.content || res.data || [];
       
       // 만약 data가 객체라면 그 안의 배열을 찾아보기
       if (!Array.isArray(data) && typeof data === "object") {
-        console.log("data는 객체입니다. 내용:", data);
-        console.log("객체의 키:", Object.keys(data));
         // content 필드 확인
         if (data.content && Array.isArray(data.content)) {
           data = data.content;
         }
       }
       
-      console.log("최종 처리할 데이터:", data);
-      console.log("배열 여부:", Array.isArray(data));
-      
       if (Array.isArray(data)) {
-        console.log("데이터 개수:", data.length);
-        if (data.length > 0) {
-          console.log("첫 번째 데이터:", data[0]);
-        }
         setSchedules(data);
       } else {
-        console.warn("데이터가 배열이 아닙니다:", data);
         setSchedules([]);
       }
     } catch (e: any) {
-      console.error("입영 일정 조회 실패:", {
-        message: e?.message,
-        response: e?.response?.data,
-        status: e?.response?.status,
-      });
-      
       if (e?.response?.data?.message) {
         alert(`오류: ${e.response.data.message}`);
       } else {
@@ -132,9 +110,6 @@ export default function Enlistment() {
         m.set(dateStr, { ...s, enlistmentDate: dateStr } as Schedule);
       }
     });
-    console.log("scheduleMap 생성됨:", m);
-    console.log("scheduleMap 크기:", m.size);
-    console.log("scheduleMap 키:", Array.from(m.keys()));
     return m;
   }, [schedules]);
 
@@ -182,7 +157,6 @@ export default function Enlistment() {
       alert("입영 신청이 완료되었습니다.");
       await fetchSchedules();
     } catch (e: any) {
-      console.error("입영 신청 실패", e);
       alert(
         e?.response?.data?.message ??
           "입영 신청 중 오류가 발생했습니다."
@@ -267,9 +241,14 @@ export default function Enlistment() {
                     <div className="day-num">{cell.day}</div>
                     {sch && (
                       <div className="badge">
-                        {sch.remainingSlots > 0
-                          ? `잔여 ${sch.remainingSlots}`
-                          : "마감"}
+                        {sch.remainingSlots > 0 ? (
+                          <>
+                            <span className="badge-label">잔여</span>
+                            <span className="badge-num">{sch.remainingSlots}</span>
+                          </>
+                        ) : (
+                          "마감"
+                        )}
                       </div>
                     )}
                   </button>

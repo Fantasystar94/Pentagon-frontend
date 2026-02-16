@@ -1,7 +1,15 @@
+.order-complete-page,
+.order-complete-page * {
+  box-sizing: border-box;
+}
+
 .order-complete-page {
-  padding: 48px;
+  padding: clamp(16px, 5vw, 48px);
   display: flex;
   justify-content: center;
+  background: #f5f6fa;
+  min-height: calc(100dvh - 64px);
+  color: #213547;
 }
 
 .complete-card {
@@ -11,6 +19,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   text-align: center;
+  background: #fff;
 }
 
 .check-icon {
@@ -28,6 +37,7 @@
   display: flex;
   gap: 12px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .actions button {
@@ -44,4 +54,19 @@
 .secondary {
   background: white;
   border: 1px solid #ccc;
+}
+
+@media (max-width: 480px) {
+  .complete-card {
+    padding: 24px;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions button {
+    width: 100%;
+  }
 }
