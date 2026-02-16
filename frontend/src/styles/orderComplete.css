@@ -54,6 +54,7 @@
 .secondary {
   background: white;
   border: 1px solid #ccc;
+  color:#646cff ;
 }
 
 @media (max-width: 480px) {
