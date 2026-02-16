@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/userAuth";
 import "../styles/header.css";
+import logo from "../assets/logo.png";
 
 export default function Header() {
   const { isLoggedIn, isAdmin, logout } = useAuth();
@@ -14,7 +15,7 @@ export default function Header() {
   return (
     <header className="app-header">
       <div className="app-logo">
-        <Link to="/"><div className="logo"><img src="../src/assets/logo.png" alt="병무청 로고" /></div>병무청</Link>
+        <Link to="/"><div className="logo"><img src={logo} alt="병무청 로고" /></div>병무청</Link>
       </div>
 
       <nav className="app-nav">
