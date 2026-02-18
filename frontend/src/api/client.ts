@@ -2,10 +2,10 @@ import axios from "axios";
 
 
 // const _awsUrl = "http://43.201.115.73:8080";
-// const _localUrl = "http://localhost:8080";
+const localUrl = "http://localhost:8080";
 
 export const api = axios.create({
-  baseURL: "/api",
+  baseURL: localUrl+"/api",
   withCredentials: true,
 });
 
