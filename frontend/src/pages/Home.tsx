@@ -89,6 +89,54 @@ export default function Home() {
       });
   }, []);
 
+  const getProfileImageUrl = (profile: any): string | null => {
+    const candidate = profile?.profileImageUrl;
+    if (typeof candidate !== "string") return null;
+    const trimmed = candidate.trim();
+    return trimmed ? trimmed : null;
+  };
+
+  const profileImageUrl = getProfileImageUrl(detailedUserInfo);
+  const avatarFallbackText = (() => {
+    const name = typeof detailedUserInfo?.username === "string" ? detailedUserInfo.username.trim() : "";
+    return name ? name.slice(0, 1) : "U";
+  })();
+
+  const thisWeekList: any[] = (() => {
+    const data = thisWeekSchedules;
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.enlistmentResponse)) return data.enlistmentResponse;
+    if (data?.enlistmentResponse && typeof data.enlistmentResponse === "object") {
+      return [data.enlistmentResponse];
+    }
+    if (Array.isArray(data?.content)) return data.content;
+    return [];
+  })();
+
+  const visibleThisWeekList = (() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const parseYmdToLocalDate = (value?: string): Date | null => {
+      if (!value || typeof value !== "string") return null;
+      const trimmed = value.trim();
+      const m = /^\d{4}-\d{2}-\d{2}$/.exec(trimmed);
+      if (!m) return null;
+      const [y, mo, d] = trimmed.split("-").map((v) => Number(v));
+      if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(d)) return null;
+      return new Date(y, mo - 1, d);
+    };
+
+    return thisWeekList.filter((it) => {
+      const dateStr = it?.enlistmentDate ?? it?.date;
+      const parsed = parseYmdToLocalDate(dateStr);
+      // 날짜 파싱이 안 되면 일단 보여주기
+      if (!parsed) return true;
+      parsed.setHours(0, 0, 0, 0);
+      return parsed >= today;
+    });
+  })();
+
 
   return (
     <>
@@ -97,8 +145,27 @@ export default function Home() {
       <main style={styles.container}>
         {/* 인사 영역 */}
         <section style={styles.hero}>
-          <h1 style={styles.title}>
-            {isLoggedIn && detailedUserInfo ? `${detailedUserInfo.username} 님, 안녕하세요?` : "안녕하세요?"}
+          <h1
+            style={{
+              ...styles.title,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
+            }}
+          >
+            {isLoggedIn && detailedUserInfo && (
+              <span style={styles.avatarWrap}>
+                {profileImageUrl ? (
+                  <img src={profileImageUrl} alt="프로필" style={styles.avatarImg} loading="lazy" />
+                ) : (
+                  <span style={styles.avatarFallback}>{avatarFallbackText}</span>
+                )}
+              </span>
+            )}
+            <span>
+              {isLoggedIn && detailedUserInfo ? `${detailedUserInfo.username} 님, 안녕하세요?` : "안녕하세요?"}
+            </span>
           </h1>
 
           <div style={styles.searchBox} className="searchBox">
@@ -196,23 +263,23 @@ export default function Home() {
             <h4>이번주 입영 일정</h4>
             {thisWeekLoading ? (
               <p style={{ fontSize: "14px", color: "#999" }}>로딩 중...</p>
-            ) : thisWeekSchedules && Array.isArray(thisWeekSchedules) && thisWeekSchedules.length > 0 ? (
+            ) : visibleThisWeekList.length > 0 ? (
               <>
                 <div style={{ marginBottom: "12px" }}>
-                  {thisWeekSchedules.map((schedule: any, index: number) => (
+                  {visibleThisWeekList.map((schedule: any, index: number) => (
                     <div
-                      key={index}
+                      key={schedule?.scheduleId ?? schedule?.scheduledId ?? schedule?.id ?? index}
                       style={{
                         fontSize: "13px",
                         padding: "8px 0",
-                        borderBottom: index < thisWeekSchedules.length - 1 ? "1px solid #eee" : "none",
+                        borderBottom: index < visibleThisWeekList.length - 1 ? "1px solid #eee" : "none",
                       }}
                     >
                       <p style={{ margin: "4px 0", fontWeight: "600" }}>
-                        {schedule.enlistmentDate || "날짜 미정"}
+                        {schedule.enlistmentDate ?? schedule.date ?? "날짜 미정"}
                       </p>
                       <p style={{ margin: "2px 0", fontSize: "12px", color: "#666" }}>
-                        잔여: {schedule.remainingSlots || 0}명
+                        잔여: {schedule.remainingSlots ?? schedule.remaining ?? 0}명
                       </p>
                       {schedule.weather && (
                         <p style={{ margin: "2px 0", fontSize: "12px", color: "#999" }}>
@@ -311,6 +378,31 @@ const styles = {
     fontSize: "32px",
     fontWeight: "700",
     marginBottom: "20px",
+  } as const,
+
+  avatarWrap: {
+    width: "44px",
+    height: "44px",
+    borderRadius: "999px",
+    overflow: "hidden",
+    border: "1px solid #e5e7ef",
+    backgroundColor: "#f5f5f7",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flex: "0 0 auto",
+  } as const,
+
+  avatarImg: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover" as const,
+  } as const,
+
+  avatarFallback: {
+    fontSize: "16px",
+    fontWeight: "700",
+    color: "#4b5565",
   } as const,
 
   searchBox: {

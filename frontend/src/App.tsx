@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import KakaoCallback from "./pages/KakaoCallback.tsx";
 import Signup from "./pages/Signup";
 import Enlistment from "./pages/Enlistment";
 import Deferments from "./pages/Deferments";
@@ -33,6 +34,7 @@ function App() {
         <Route path="/orders/new" element={<OrderCreate />} />
         <Route path="/orders/complete" element={<OrderComplete />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/oauth/kakao/callback" element={<KakaoCallback />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/enlistment" element={<Enlistment />} />
         <Route path="/deferments" element={<Deferments />} />

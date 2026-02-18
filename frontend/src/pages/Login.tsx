@@ -2,12 +2,42 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { authApi } from "../api/authApi";
 import "../styles/login.css";
+import Header from "../components/Header";
 
 export default function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
+  const handleKakaoStart = () => {
+    setError("");
+
+    const clientId =
+      (import.meta.env.VITE_KAKAO_REST_API_KEY as string | undefined) ??
+      (import.meta.env.VITE_KAKAO_CLIENT_ID as string | undefined);
+    const redirectUri =
+      (import.meta.env.VITE_KAKAO_REDIRECT_URI as string | undefined) ??
+      `${window.location.origin}/oauth/kakao/callback`;
+
+    if (!clientId) {
+      setError("카카오 REST API 키(client_id)가 설정되지 않았습니다. (VITE_KAKAO_REST_API_KEY 또는 VITE_KAKAO_CLIENT_ID)");
+      return;
+    }
+
+    // CSRF 방지용 state
+    const state = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    sessionStorage.setItem("kakao_oauth_state", state);
+
+    const authUrl =
+      `https://kauth.kakao.com/oauth/authorize` +
+      `?response_type=code` +
+      `&client_id=${encodeURIComponent(clientId)}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&state=${encodeURIComponent(state)}`;
+
+    window.location.href = authUrl;
+  };
 
 const handleLogin = async () => {
   try {
@@ -37,6 +67,8 @@ const handleLogin = async () => {
 };
 
   return (
+    <>
+    <Header></Header>
     <div className="login-page">
       <div className="login-box">
         <h2 className="login-title">로그인</h2>
@@ -74,6 +106,14 @@ const handleLogin = async () => {
             로그인
           </button>
 
+          <button
+            className="login-button kakao-login-button"
+            type="button"
+            onClick={handleKakaoStart}
+          >
+            카카오로 로그인
+          </button>
+
           <div className="login-footer">
             <span>아직 계정이 없으신가요?</span>
             <Link to="/signup">회원가입</Link>
@@ -81,5 +121,6 @@ const handleLogin = async () => {
         </form>
       </div>
     </div>
+    </>
   );
 }

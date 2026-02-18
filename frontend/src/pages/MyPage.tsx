@@ -13,6 +13,8 @@ export default function MyPage() {
   const { isLoggedIn, userId, isInitialized, logout } = useAuth();
   const [userInfo, setUserInfo] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [profileUploading, setProfileUploading] = useState(false);
+  const [profileUploadMessage, setProfileUploadMessage] = useState({ type: "", text: "" });
   const [showEditModal, setShowEditModal] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -32,6 +34,18 @@ export default function MyPage() {
     scheduleId: null as number | null,
   });
   const [scheduleOptions, setScheduleOptions] = useState<any[]>([]);
+
+  const getProfileImageUrl = (profile: any): string | null => {
+    const candidate = profile?.profileImageUrl;
+    if (typeof candidate !== "string") return null;
+    const trimmed = candidate.trim();
+    return trimmed ? trimmed : null;
+  };
+
+  const getAvatarFallbackText = (profile: any): string => {
+    const name = typeof profile?.username === "string" ? profile.username.trim() : "";
+    return name ? name.slice(0, 1) : "U";
+  };
 
   useEffect(() => {
     if (!isInitialized) {
@@ -246,6 +260,45 @@ export default function MyPage() {
     setMessage({ type: "", text: "" });
   };
 
+  const handleProfileImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    // 같은 파일 재선택을 위해 value 초기화
+    e.target.value = "";
+
+    if (!file) return;
+    if (!file.type?.startsWith("image/")) {
+      setProfileUploadMessage({ type: "error", text: "이미지 파일만 업로드할 수 있습니다." });
+      return;
+    }
+    // 5MB 제한(과도한 업로드 방지)
+    if (file.size > 5 * 1024 * 1024) {
+      setProfileUploadMessage({ type: "error", text: "이미지 용량은 5MB 이하여야 합니다." });
+      return;
+    }
+    if (!userId) {
+      setProfileUploadMessage({ type: "error", text: "로그인 정보를 확인할 수 없습니다." });
+      return;
+    }
+
+    setProfileUploading(true);
+    setProfileUploadMessage({ type: "", text: "" });
+    try {
+      await userApi.uploadProfileImage(file);
+      setProfileUploadMessage({ type: "success", text: "프로필 이미지가 업로드되었습니다." });
+
+      const res = await userApi.getProfile(userId);
+      const profile = res.data?.data;
+      setUserInfo(profile);
+    } catch (err: any) {
+      setProfileUploadMessage({
+        type: "error",
+        text: err?.response?.data?.message || "프로필 이미지 업로드에 실패했습니다.",
+      });
+    } finally {
+      setProfileUploading(false);
+    }
+  };
+
   const handleUpdateProfile = async () => {
     if (!formData.currentPassword) {
       setMessage({ type: "error", text: "현재 비밀번호를 입력해주세요." });
@@ -362,6 +415,61 @@ export default function MyPage() {
             <>
               <section className="mypage-card">
                 <h1 className="mypage-title">내 정보</h1>
+
+                <div className="mypage-profile-row">
+                  {(() => {
+                    const profileImageUrl = getProfileImageUrl(userInfo);
+                    return (
+                      <>
+                  <div className="mypage-avatar">
+                    {profileImageUrl ? (
+                      <img
+                        src={profileImageUrl}
+                        alt="프로필 이미지"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="mypage-avatar-fallback">{getAvatarFallbackText(userInfo)}</div>
+                    )}
+                  </div>
+
+                  <div className="mypage-profile-actions">
+                    {!profileImageUrl && (
+                      <>
+                        <input
+                          id="mypage-profile-file"
+                          className="mypage-file-input"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleProfileImageChange}
+                          disabled={profileUploading}
+                        />
+                        <label
+                          htmlFor="mypage-profile-file"
+                          className={`mypage-upload-btn ${profileUploading ? "disabled" : ""}`}
+                          aria-disabled={profileUploading}
+                        >
+                          {profileUploading ? "업로드 중..." : "프로필 이미지 업로드"}
+                        </label>
+                        <p className="mypage-subtext">마이페이지에서 업로드하면 홈에도 반영됩니다.</p>
+                      </>
+                    )}
+
+                    {profileUploadMessage.text && (
+                      <div
+                        className={`mypage-message ${
+                          profileUploadMessage.type === "error" ? "error" : "success"
+                        }`}
+                        style={{ marginTop: "12px", marginBottom: 0 }}
+                      >
+                        {profileUploadMessage.text}
+                      </div>
+                    )}
+                  </div>
+                      </>
+                    );
+                  })()}
+                </div>
 
                 <div className="mypage-info-list">
                   <div className="mypage-info-row">
