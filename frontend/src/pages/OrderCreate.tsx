@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { orderApi } from "../api/orderApi";
 import Header from "../components/Header";
@@ -6,12 +6,54 @@ import { addOrderToHistory } from "../store/orderHistory";
 import { setPendingPaymentV2 } from "../store/pendingPayment";
 import "../styles/orderCreate.css";
 
+type BulkCheckoutItem = {
+  product: {
+    productId: number;
+    name: string;
+    description?: string;
+    price: number;
+    stock?: number;
+    productImageUrl?: string;
+  };
+  quantity: number;
+};
+
+type BulkCheckoutPayload = {
+  index: number;
+  items: BulkCheckoutItem[];
+};
+
 export default function OrderCreate() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const [isPaying, setIsPaying] = useState(false);
 
-  const { product, quantity } = (state as any) || {};
+  const BULK_CHECKOUT_KEY = "pentagon_bulk_checkout_v1";
+
+  const bulk: BulkCheckoutPayload | null = useMemo(() => {
+    const raw = sessionStorage.getItem(BULK_CHECKOUT_KEY);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as Partial<BulkCheckoutPayload>;
+      if (!parsed || !Array.isArray(parsed.items) || parsed.items.length === 0)
+        return null;
+      const idx =
+        typeof parsed.index === "number" && Number.isFinite(parsed.index)
+          ? parsed.index
+          : 0;
+      const safeIndex = Math.min(Math.max(0, idx), parsed.items.length - 1);
+      return { index: safeIndex, items: parsed.items as BulkCheckoutItem[] };
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const fromState = (state as any) || {};
+
+  const product =
+    fromState.product ?? bulk?.items?.[Number(bulk.index)]?.product ?? null;
+  const quantity =
+    fromState.quantity ?? bulk?.items?.[Number(bulk.index)]?.quantity ?? null;
 
   useEffect(() => {
     if (!product || !quantity) {
@@ -21,6 +63,19 @@ export default function OrderCreate() {
   }, [product, quantity, navigate]);
 
   if (!product || !quantity) return null;
+
+  const isBulkFlow =
+    !!bulk &&
+    Number.isFinite(Number(bulk.index)) &&
+    Array.isArray(bulk.items) &&
+    bulk.items.length > 0 &&
+    bulk.items[Number(bulk.index)]?.product?.productId === product.productId;
+
+  const bulkTotalCount = isBulkFlow ? bulk.items.length : 0;
+  const bulkCurrentIndex = isBulkFlow ? Number(bulk.index) : 0;
+  const bulkRemaining = isBulkFlow
+    ? bulk.items.slice(bulkCurrentIndex + 1)
+    : [];
 
   const totalPrice = (product.price ?? 0) * quantity;
 
@@ -152,6 +207,14 @@ export default function OrderCreate() {
         <h2 className="order-create-title">주문 확인</h2>
         <p className="order-create-subtitle">결제 전 주문 정보를 확인해주세요.</p>
 
+        {isBulkFlow && (
+          <div className="order-create-bulk-banner">
+            <div className="order-create-bulk-title">
+              전체 주문 진행중 ({bulkCurrentIndex + 1}/{bulkTotalCount})
+            </div>
+          </div>
+        )}
+
         <section className="order-create-card">
           <div className="order-create-item">
             <div className="order-create-thumb">
@@ -189,6 +252,27 @@ export default function OrderCreate() {
               </div>
             </div>
           </div>
+
+          {isBulkFlow && bulkRemaining.length > 0 && (
+            <div className="order-create-bulk-queue">
+              <div className="order-create-bulk-queue-title">
+                다음 결제 예정 ({bulkRemaining.length}개)
+              </div>
+              <ul className="order-create-bulk-queue-list">
+                {bulkRemaining.map((it) => (
+                  <li
+                    key={it.product.productId}
+                    className="order-create-bulk-queue-item"
+                  >
+                    <span className="name">{it.product.name}</span>
+                    <span className="meta">
+                      {it.quantity}개 · {(it.product.price * it.quantity).toLocaleString()}원
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="order-create-actions">
             <button

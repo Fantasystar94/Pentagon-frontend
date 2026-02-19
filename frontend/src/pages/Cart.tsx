@@ -16,11 +16,37 @@ export default function Cart() {
   const navigate = useNavigate();
   const [items, setItems] = useState<CartItem[]>([]);
 
+  const BULK_CHECKOUT_KEY = "pentagon_bulk_checkout_v1";
+
   useEffect(() => {
     setItems(loadCart());
   }, []);
 
   const total = getCartTotal(items);
+
+  const startBulkCheckout = () => {
+    if (items.length === 0) return;
+
+    const payload = {
+      index: 0,
+      items: items.map((it) => ({
+        product: {
+          productId: it.productId,
+          name: it.name,
+          description: it.description,
+          price: it.price,
+          stock: it.stock,
+          productImageUrl: it.productImageUrl,
+        },
+        quantity: it.quantity,
+      })),
+    };
+
+    sessionStorage.setItem(BULK_CHECKOUT_KEY, JSON.stringify(payload));
+
+    const first = payload.items[0];
+    navigate("/orders/new", { state: { product: first.product, quantity: first.quantity } });
+  };
 
   return (
     <>
@@ -99,6 +125,9 @@ export default function Cart() {
                 <strong>{total.toLocaleString()}원</strong>
               </div>
               <div className="cart-summary-actions">
+                <button className="cart-btn" onClick={startBulkCheckout}>
+                  전체 주문하기(순차 결제)
+                </button>
                 <button
                   className="cart-btn ghost"
                   onClick={() => {
